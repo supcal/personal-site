@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { spawn } = require("child_process");
 
 const root = __dirname;
 const dataFile = path.join(root, "data", "site.json");
@@ -120,6 +121,28 @@ function writeSiteData(siteData) {
   fs.writeFileSync(dataFile, `${JSON.stringify(siteData, null, 2)}\n`, "utf8");
 }
 
+function runPublishScript() {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [path.join(root, "scripts", "publish-github.js")], {
+      cwd: root,
+      env: { ...process.env },
+      windowsHide: true
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += chunk.toString(); });
+    child.stderr.on("data", (chunk) => { stderr += chunk.toString(); });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr || stdout || `Publish failed with exit code ${code}`));
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
 function sanitizeFileName(name) {
   const ext = path.extname(name || "");
   const base = path.basename(name || "file", ext).replace(/[^\w\u4e00-\u9fa5.-]+/g, "-");
@@ -207,6 +230,14 @@ async function handleApi(req, res) {
     const outPath = path.join(outDir, fileName);
     fs.writeFileSync(outPath, Buffer.from(match[1], "base64"));
     send(res, 200, JSON.stringify({ ok: true, url: `files/${folder}/${fileName}` }));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/publish") {
+    if (!requireAdmin(req, res)) return true;
+    const output = await runPublishScript();
+    const payload = safeJsonParse(output) || { ok: true, output };
+    send(res, 200, JSON.stringify(payload));
     return true;
   }
 

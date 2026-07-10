@@ -415,6 +415,22 @@ th {
   margin: 12px 0;
 }
 
+.photo-cropper {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.photo-cropper canvas {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+}
+
 @media (max-width: 900px) {
   .nav {
     align-items: flex-start;
@@ -438,7 +454,8 @@ th {
   .section-grid,
   .stats,
   .filters,
-  .form-grid {
+  .form-grid,
+  .photo-cropper {
     grid-template-columns: 1fr;
   }
 

@@ -3,7 +3,8 @@ const adminState = {
   module: "profile",
   editing: null,
   importPreview: [],
-  token: sessionStorage.getItem("academic-admin-token") || ""
+  token: sessionStorage.getItem("academic-admin-token") || "",
+  photoEditor: null
 };
 
 const modules = [
@@ -255,6 +256,18 @@ function renderProfile() {
       <div class="field"><label>办公室</label><input id="office" value="${esc(profile.office)}"></div>
       <div class="field"><label>工作照 URL</label><input id="photo" value="${esc(profile.photo)}"></div>
       <div class="field"><label>上传工作照</label><input id="photo-file" type="file" accept="image/*"></div>
+      <div class="field full">
+        <label>照片裁剪与缩放</label>
+        <div class="photo-cropper">
+          <canvas id="photo-crop-canvas" width="800" height="1000" aria-label="工作照裁剪预览"></canvas>
+          <div class="form-grid">
+            <div class="field"><label>缩放</label><input id="photo-zoom" type="range" min="0.5" max="3" step="0.01" value="1"></div>
+            <div class="field"><label>左右移动</label><input id="photo-offset-x" type="range" min="-100" max="100" step="1" value="0"></div>
+            <div class="field"><label>上下移动</label><input id="photo-offset-y" type="range" min="-100" max="100" step="1" value="0"></div>
+            <div class="field"><label>输出比例</label><input value="4:5，适合首页工作照" disabled></div>
+          </div>
+        </div>
+      </div>
       <div class="field full"><label>关键词，用逗号分隔</label><input id="keywords" value="${esc(joinTags(profile.keywords))}"></div>
       ${localizedTextarea("summary", "首页摘要", profile.summary)}
       ${localizedTextarea("bio", "个人简介", profile.bio)}
@@ -276,12 +289,90 @@ function bindProfile() {
     profile.photo = byId("photo").value.trim();
     profile.keywords = splitTags(byId("keywords").value);
     const file = byId("photo-file").files[0];
-    if (file) {
+    if (adminState.photoEditor?.image) {
+      profile.photo = await uploadDataUrl("work-photo.jpg", getCroppedPhotoDataUrl(), "images");
+      adminState.photoEditor = null;
+    } else if (file) {
       profile.photo = await uploadFile(file, "images");
     }
     toast("个人信息已应用。记得保存全部内容。");
     render();
   });
+  bindPhotoEditor();
+}
+
+function bindPhotoEditor() {
+  const fileInput = byId("photo-file");
+  const zoom = byId("photo-zoom");
+  const offsetX = byId("photo-offset-x");
+  const offsetY = byId("photo-offset-y");
+  const canvas = byId("photo-crop-canvas");
+  if (!fileInput || !canvas) return;
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const dataUrl = await fileToDataUrl(file);
+    const image = new Image();
+    image.onload = () => {
+      adminState.photoEditor = { image, zoom: 1, offsetX: 0, offsetY: 0 };
+      zoom.value = "1";
+      offsetX.value = "0";
+      offsetY.value = "0";
+      drawPhotoCrop();
+    };
+    image.src = dataUrl;
+  });
+
+  [zoom, offsetX, offsetY].forEach((input) => {
+    input.addEventListener("input", () => {
+      if (!adminState.photoEditor) return;
+      adminState.photoEditor.zoom = Number(zoom.value);
+      adminState.photoEditor.offsetX = Number(offsetX.value);
+      adminState.photoEditor.offsetY = Number(offsetY.value);
+      drawPhotoCrop();
+    });
+  });
+
+  drawPhotoCrop();
+}
+
+function drawPhotoCrop() {
+  const canvas = byId("photo-crop-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#edf3f1";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#d9dedc";
+  ctx.strokeRect(0.5, 0.5, canvas.width - 1, canvas.height - 1);
+
+  const editor = adminState.photoEditor;
+  if (!editor?.image) {
+    ctx.fillStyle = "#6a7478";
+    ctx.font = "32px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("选择照片后在这里裁剪", canvas.width / 2, canvas.height / 2);
+    return;
+  }
+
+  const image = editor.image;
+  const baseScale = Math.max(canvas.width / image.width, canvas.height / image.height);
+  const scale = baseScale * editor.zoom;
+  const width = image.width * scale;
+  const height = image.height * scale;
+  const x = (canvas.width - width) / 2 + editor.offsetX * canvas.width / 100;
+  const y = (canvas.height - height) / 2 + editor.offsetY * canvas.height / 100;
+  ctx.drawImage(image, x, y, width, height);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.82)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
+}
+
+function getCroppedPhotoDataUrl() {
+  const canvas = byId("photo-crop-canvas");
+  return canvas.toDataURL("image/jpeg", 0.9);
 }
 
 function renderListModule(key, title, columns, formRenderer) {
@@ -739,16 +830,23 @@ function bindRawAdmin() {
 }
 
 async function uploadFile(file, folder) {
-  const dataUrl = await new Promise((resolve, reject) => {
+  return uploadDataUrl(file.name, await fileToDataUrl(file), folder);
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+async function uploadDataUrl(fileName, dataUrl, folder) {
   const res = await apiFetch("/api/upload", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fileName: file.name, dataUrl, folder })
+    body: JSON.stringify({ fileName, dataUrl, folder })
   });
   const result = await res.json();
   if (!res.ok) throw new Error(result.error || "上传失败");
@@ -792,6 +890,29 @@ byId("save-site").addEventListener("click", () => {
     return;
   }
   saveData().catch((error) => toast(`保存失败：${error.message}`));
+});
+
+byId("publish-site").addEventListener("click", async () => {
+  if (!adminState.data) {
+    renderAuth("请先登录后台。");
+    return;
+  }
+  if (!confirm("发布前请确认已经点击“保存全部内容”。现在要把当前网站发布到 GitHub 吗？")) return;
+  const button = byId("publish-site");
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "正在发布...";
+  try {
+    const res = await apiFetch("/api/publish", { method: "POST" });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(result.error || "发布失败");
+    toast(`发布完成：${result.commit || ""} ${result.pagesUrl || ""}`);
+  } catch (error) {
+    toast(`发布失败：${error.message}`);
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
 });
 
 byId("logout-admin").addEventListener("click", async () => {

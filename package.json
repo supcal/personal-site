@@ -5,6 +5,7 @@
   "description": "Academic personal website with a local visual content admin for GitHub Pages.",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "publish": "node scripts/publish-github.js"
   }
 }
