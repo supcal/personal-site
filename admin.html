@@ -3,11 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>可视化编辑 | 李超个人主页</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./admin.css" />
   </head>
-  <body>
+  <body class="locked">
+    <section class="auth-screen" id="authScreen" aria-label="编辑页面登录">
+      <form class="auth-card" id="authForm">
+        <p class="eyebrow">Private Editor</p>
+        <h1>请输入编辑密码</h1>
+        <p>此页面用于修改个人主页内容，仅供本人使用。</p>
+        <input class="visually-hidden" autocomplete="username" value="site-editor" aria-hidden="true" />
+        <label>编辑密码<input id="editorPassword" type="password" autocomplete="current-password" /></label>
+        <button class="button" type="submit">进入编辑器</button>
+        <p class="auth-error" id="authError" role="alert"></p>
+      </form>
+    </section>
+
     <header class="editor-header">
       <div>
         <p class="eyebrow">Visual Editor</p>
@@ -15,6 +29,7 @@
       </div>
       <nav class="editor-actions" aria-label="编辑操作">
         <a class="button ghost" href="./index.html">查看主页</a>
+        <button class="button" id="saveDraft" type="button">保存修改</button>
         <button class="button" id="downloadJson" type="button">下载 data.json</button>
         <button class="button secondary-action" id="copyJson" type="button">复制 JSON</button>
       </nav>
@@ -24,7 +39,8 @@
       <section class="editor-panel" aria-label="内容编辑">
         <div class="editor-note">
           <strong>使用方式：</strong>
-          在这里修改内容，右侧会实时预览。修改完成后点击“下载 data.json”，再到 GitHub 仓库替换 `data.json` 文件即可发布。
+          在这里修改内容，右侧会实时预览。确认无误后先点“保存修改”，再点“下载 data.json”，到 GitHub 仓库替换 `data.json` 文件即可发布。
+          <span id="saveStatus" class="save-status">尚未保存本次修改</span>
         </div>
 
         <form id="editorForm">
@@ -38,8 +54,13 @@
               <label>职称头衔<input data-path="titles" /></label>
               <label>邮箱<input data-path="email" /></label>
               <label class="wide">照片地址<input data-path="portrait" /></label>
+              <label>选择照片<input id="portraitUpload" type="file" accept="image/*" /></label>
+              <label>照片缩放<input data-path="portrait_scale" type="range" min="1" max="2.4" step="0.05" /></label>
+              <label>水平位置<input data-path="portrait_x" type="range" min="0" max="100" step="1" /></label>
+              <label>垂直位置<input data-path="portrait_y" type="range" min="0" max="100" step="1" /></label>
               <label class="wide">资料来源地址<input data-path="source_url" /></label>
             </div>
+            <div class="repeatable" data-repeat="links"></div>
           </section>
 
           <section class="form-section">
@@ -84,6 +105,12 @@
       </section>
 
       <aside class="preview-panel" aria-label="实时预览">
+        <div class="photo-preview-card">
+          <div class="portrait-wrap">
+            <img id="previewPortrait" class="portrait" alt="照片预览" />
+          </div>
+          <p>照片会以主页左侧头像区域的裁切方式预览。</p>
+        </div>
         <div class="preview-card">
           <p class="eyebrow" id="previewKicker"></p>
           <h2 id="previewTitle"></h2>
