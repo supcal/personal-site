@@ -12,7 +12,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#top">李超</a>
+      <a class="brand" href="#top" data-field="name">李超</a>
       <nav class="nav" aria-label="页面导航">
         <a href="#about">简介</a>
         <a href="#research">研究</a>
@@ -20,6 +20,7 @@
         <a href="#publications">论文</a>
         <a href="#teaching">教学</a>
         <a href="#contact">联系</a>
+        <a href="./admin.html">编辑</a>
       </nav>
     </header>
 
@@ -27,50 +28,31 @@
       <section class="hero">
         <aside class="profile-panel" aria-label="个人信息">
           <div class="portrait-wrap">
-            <img
-              src="https://xxgc.tjnu.edu.cn/__local/1/F3/49/5EAA330131F55FCED9FB622694C_AC38FA7A_112AC.jpg"
-              alt="李超"
-              class="portrait"
-            />
+            <img alt="李超" class="portrait" data-field="portrait" />
           </div>
           <div class="identity">
-            <p class="eyebrow">Associate Professor</p>
-            <h1>李超</h1>
-            <p>天津师范大学计算机与信息工程学院</p>
-            <p>副教授 / 硕士导师 / 工学博士</p>
+            <p class="eyebrow" data-field="role_en"></p>
+            <h1 data-field="name"></h1>
+            <p data-field="affiliation_cn"></p>
+            <p data-field="titles"></p>
           </div>
           <dl class="quick-info">
             <div>
               <dt>Email</dt>
-              <dd><a href="mailto:superlee@tjnu.edu.cn">superlee@tjnu.edu.cn</a></dd>
+              <dd><a data-field="email_link"></a></dd>
             </div>
             <div>
               <dt>Affiliation</dt>
-              <dd>College of Computer and Information Engineering, TJNU</dd>
+              <dd data-field="affiliation_en"></dd>
             </div>
           </dl>
         </aside>
 
         <div class="hero-copy">
-          <p class="eyebrow">Artificial Intelligence · Affective Computing · BCI</p>
-          <h2>面向多模态智能感知与情感计算的研究与教学</h2>
-          <p>
-            我主要从事人工智能、深度学习、情感计算与脑机接口相关研究，关注脑电、语音、近红外等多模态生理与行为数据的表征学习、融合建模和智能分析。
-          </p>
-          <div class="hero-stats" aria-label="学术概览">
-            <div>
-              <strong>3</strong>
-              <span>主持国家级项目</span>
-            </div>
-            <div>
-              <strong>20+</strong>
-              <span>发表学术论文</span>
-            </div>
-            <div>
-              <strong>4</strong>
-              <span>主讲课程</span>
-            </div>
-          </div>
+          <p class="eyebrow" data-field="hero_kicker"></p>
+          <h2 data-field="hero_title"></h2>
+          <p data-field="hero_summary"></p>
+          <div class="hero-stats" data-list="stats" aria-label="学术概览"></div>
         </div>
       </section>
 
@@ -79,14 +61,7 @@
           <p class="eyebrow">Profile</p>
           <h2>个人简介</h2>
         </div>
-        <div class="section-body">
-          <p>
-            李超，天津师范大学计算机与信息工程学院副教授、硕士导师，工学博士。中国计算机学会会员、中国人工智能学会会员。近年来主持国家级项目 3 项，参与国家及省部级项目 7 项，发表学术论文 20 余篇。
-          </p>
-          <p>
-            研究工作围绕多模态生理情感数据、EEG 情感识别、跨域表征学习、动态图神经网络与注意力机制等方向展开，致力于提升智能系统对复杂人类状态的理解能力。
-          </p>
-        </div>
+        <div class="section-body" data-list="profile"></div>
       </section>
 
       <section id="research" class="section">
@@ -94,23 +69,7 @@
           <p class="eyebrow">Research Areas</p>
           <h2>研究方向</h2>
         </div>
-        <div class="research-grid">
-          <article>
-            <span>01</span>
-            <h3>人工智能与深度学习</h3>
-            <p>面向多源异构数据的表示学习、迁移学习、注意力模型与图神经网络方法。</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>情感计算</h3>
-            <p>利用 EEG、语音等信号开展情绪识别、情感状态建模与多模态融合分析。</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>脑机接口</h3>
-            <p>围绕脑电信号理解、动态脑网络建模和人机交互中的认知状态识别开展研究。</p>
-          </article>
-        </div>
+        <div class="research-grid" data-list="research"></div>
       </section>
 
       <section id="projects" class="section two-column">
@@ -118,28 +77,7 @@
           <p class="eyebrow">Selected Grants</p>
           <h2>科研项目</h2>
         </div>
-        <div class="timeline">
-          <article>
-            <time>2024.10 - 2027.09</time>
-            <h3>多模态脑成像融合的个性化抑郁程度分析与识别研究</h3>
-            <p>天津市自然科学基金面上项目，项目负责人。</p>
-          </article>
-          <article>
-            <time>2024.01 - 2025.12</time>
-            <h3>动态复杂环境下的相关研究</h3>
-            <p>ZB 预研教育部联合基金项目，项目负责人。</p>
-          </article>
-          <article>
-            <time>2018.01 - 2020.12</time>
-            <h3>面向不同数据质量的多模态生理情感数据融合降维方法研究</h3>
-            <p>国家自然科学基金，项目负责人。</p>
-          </article>
-          <article>
-            <time>2018.01 - 2020.12</time>
-            <h3>健康养老跨界服务的支撑理论与创新模式研究</h3>
-            <p>国家重点研发计划，子课题负责人。</p>
-          </article>
-        </div>
+        <div class="timeline" data-list="projects"></div>
       </section>
 
       <section id="publications" class="section">
@@ -147,38 +85,7 @@
           <p class="eyebrow">Publications</p>
           <h2>代表性论文</h2>
         </div>
-        <div class="publication-list">
-          <article>
-            <p class="pub-year">2024</p>
-            <p>
-              <strong>Chao Li</strong>, Ning Bian, Ziping Zhao*, Haishuai Wang, Björn Schuller. Multi-view domain-adaptive representation learning for EEG-based emotion recognition. <em>Information Fusion</em>, 104: 102156.
-            </p>
-          </article>
-          <article>
-            <p class="pub-year">2024</p>
-            <p>
-              <strong>Chao Li</strong>, Feng Wang, Ziping Zhao*, Haishuai Wang, Björn Schuller. Attention-based Temporal Graph Representation Learning for EEG-based Emotion Recognition. <em>IEEE Journal of Biomedical and Health Informatics</em>.
-            </p>
-          </article>
-          <article>
-            <p class="pub-year">2020</p>
-            <p>
-              <strong>Chao Li</strong>, Zhongtian Bao, Linhao Li, Ziping Zhao. Exploring Temporal Representations by Leveraging Attention-Based Bidirectional LSTM-RNNs for Multi-Modal Emotion Recognition. <em>Information Processing & Management</em>, 57(3): 102185.
-            </p>
-          </article>
-          <article>
-            <p class="pub-year">2022</p>
-            <p>
-              <strong>Chao Li</strong>, Yong Sheng, Haishuai Wang, Mingyue Niu, Peiguang Jing, Ziping Zhao, Björn W. Schuller. EEG Emotion Recognition Based on Self-attention Dynamic Graph Neural Networks. <em>EMBC</em>.
-            </p>
-          </article>
-          <article>
-            <p class="pub-year">2021</p>
-            <p>
-              <strong>Chao Li</strong>, Boyang Chen, Ziping Zhao, Nicholas Cummins, Björn W. Schuller. Hierarchical Attention-Based Temporal Convolutional Networks for EEG-Based Emotion Recognition. <em>ICASSP</em>.
-            </p>
-          </article>
-        </div>
+        <div class="publication-list" data-list="publications"></div>
       </section>
 
       <section id="teaching" class="section two-column">
@@ -189,22 +96,11 @@
         <div class="split-content">
           <div>
             <h3>讲授课程</h3>
-            <ul class="tag-list">
-              <li>数据结构</li>
-              <li>Python 程序设计</li>
-              <li>C 语言程序设计</li>
-              <li>C++ 与面向对象技术</li>
-            </ul>
+            <ul class="tag-list" data-list="courses"></ul>
           </div>
           <div>
             <h3>奖励情况</h3>
-            <ul class="award-list">
-              <li>2024 年获天津师范大学优秀教师</li>
-              <li>2024 年获天津师范大学首届教师多媒体教学课件创新设计大赛理工类一等奖</li>
-              <li>2023 年获第三届全国高校教师教学创新大赛天津赛区新工科副高组二等奖</li>
-              <li>2022 年获天津第十六届高校青年教师教学竞赛工科组一等奖</li>
-              <li>2018 年入选天津市“131”创新型人才培养工程第三层次人选</li>
-            </ul>
+            <ul class="award-list" data-list="awards"></ul>
           </div>
         </div>
       </section>
@@ -215,17 +111,15 @@
           <h2>联系与合作</h2>
         </div>
         <div class="contact-card">
-          <p>
-            欢迎对人工智能、情感计算、脑机接口、多模态数据分析以及相关研究生培养方向感兴趣的同学和同行联系交流。
-          </p>
-          <a class="button" href="mailto:superlee@tjnu.edu.cn">superlee@tjnu.edu.cn</a>
+          <p data-field="contact_note"></p>
+          <a class="button" data-field="email_link"></a>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>© <span id="year"></span> 李超 · 天津师范大学</span>
-      <a href="https://xxgc.tjnu.edu.cn/info/1166/3643.htm">学校主页资料来源</a>
+      <span>© <span id="year"></span> <span data-field="footer_name"></span></span>
+      <a data-field="source_link">学校主页资料来源</a>
     </footer>
 
     <script src="./script.js"></script>
