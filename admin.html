@@ -29,7 +29,7 @@
       </div>
       <nav class="editor-actions" aria-label="编辑操作">
         <a class="button ghost" href="./index.html">查看主页</a>
-        <button class="button" id="saveDraft" type="button">保存修改</button>
+        <button class="button" id="saveDraft" type="button">保存修改并发布</button>
         <button class="button" id="downloadJson" type="button">下载 data.json</button>
         <button class="button secondary-action" id="copyJson" type="button">复制 JSON</button>
       </nav>
@@ -39,11 +39,19 @@
       <section class="editor-panel" aria-label="内容编辑">
         <div class="editor-note">
           <strong>使用方式：</strong>
-          在这里修改内容，右侧会实时预览。确认无误后先点“保存修改”，再点“下载 data.json”，到 GitHub 仓库替换 `data.json` 文件即可发布。
+          在这里修改内容，右侧会实时预览。填入 GitHub Token 后点击“保存修改并发布”，网站会直接更新；下载 JSON 只是备用方案。
           <span id="saveStatus" class="save-status">尚未保存本次修改</span>
         </div>
 
         <form id="editorForm">
+          <section class="form-section">
+            <h2>发布设置</h2>
+            <label class="wide">GitHub Token<input id="githubToken" type="password" autocomplete="off" placeholder="只在本次发布时使用，不会保存到网站文件" /></label>
+            <p class="field-help">
+              Token 需要有当前仓库内容读写权限。发布时只更新 GitHub 仓库中的 `data.json`。
+            </p>
+          </section>
+
           <section class="form-section">
             <h2>基本信息</h2>
             <div class="field-grid">
@@ -55,7 +63,7 @@
               <label>邮箱<input data-path="email" /></label>
               <label class="wide">照片地址<input data-path="portrait" /></label>
               <label>选择照片<input id="portraitUpload" type="file" accept="image/*" /></label>
-              <label>照片缩放<input data-path="portrait_scale" type="range" min="1" max="2.4" step="0.05" /></label>
+              <label>照片缩放<input data-path="portrait_scale" type="range" min="0.35" max="2.4" step="0.05" /></label>
               <label>水平位置<input data-path="portrait_x" type="range" min="0" max="100" step="1" /></label>
               <label>垂直位置<input data-path="portrait_y" type="range" min="0" max="100" step="1" /></label>
               <label class="wide">资料来源地址<input data-path="source_url" /></label>
