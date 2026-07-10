@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>可视化编辑 | 李超个人主页</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body>
+    <header class="editor-header">
+      <div>
+        <p class="eyebrow">Visual Editor</p>
+        <h1>个人主页可视化编辑</h1>
+      </div>
+      <nav class="editor-actions" aria-label="编辑操作">
+        <a class="button ghost" href="./index.html">查看主页</a>
+        <button class="button" id="downloadJson" type="button">下载 data.json</button>
+        <button class="button secondary-action" id="copyJson" type="button">复制 JSON</button>
+      </nav>
+    </header>
+
+    <main class="editor-layout">
+      <section class="editor-panel" aria-label="内容编辑">
+        <div class="editor-note">
+          <strong>使用方式：</strong>
+          在这里修改内容，右侧会实时预览。修改完成后点击“下载 data.json”，再到 GitHub 仓库替换 `data.json` 文件即可发布。
+        </div>
+
+        <form id="editorForm">
+          <section class="form-section">
+            <h2>基本信息</h2>
+            <div class="field-grid">
+              <label>姓名<input data-path="name" /></label>
+              <label>英文身份<input data-path="role_en" /></label>
+              <label>中文单位<input data-path="affiliation_cn" /></label>
+              <label>英文单位<input data-path="affiliation_en" /></label>
+              <label>职称头衔<input data-path="titles" /></label>
+              <label>邮箱<input data-path="email" /></label>
+              <label class="wide">照片地址<input data-path="portrait" /></label>
+              <label class="wide">资料来源地址<input data-path="source_url" /></label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <h2>首页摘要</h2>
+            <label>关键词<input data-path="hero_kicker" /></label>
+            <label>首页标题<input data-path="hero_title" /></label>
+            <label>首页简介<textarea data-path="hero_summary" rows="4"></textarea></label>
+            <div class="repeatable" data-repeat="stats"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>个人简介</h2>
+            <div class="repeatable" data-repeat="profile"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>研究方向</h2>
+            <div class="repeatable" data-repeat="research"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>科研项目</h2>
+            <div class="repeatable" data-repeat="projects"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>代表性论文</h2>
+            <div class="repeatable" data-repeat="publications"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>课程与荣誉</h2>
+            <div class="repeatable" data-repeat="courses"></div>
+            <div class="repeatable" data-repeat="awards"></div>
+          </section>
+
+          <section class="form-section">
+            <h2>联系说明</h2>
+            <label>联系说明<textarea data-path="contact_note" rows="4"></textarea></label>
+          </section>
+        </form>
+      </section>
+
+      <aside class="preview-panel" aria-label="实时预览">
+        <div class="preview-card">
+          <p class="eyebrow" id="previewKicker"></p>
+          <h2 id="previewTitle"></h2>
+          <p id="previewSummary"></p>
+          <div class="preview-meta">
+            <span id="previewName"></span>
+            <span id="previewEmail"></span>
+          </div>
+        </div>
+        <textarea id="jsonPreview" spellcheck="false" aria-label="JSON 预览"></textarea>
+      </aside>
+    </main>
+
+    <template id="rowTemplate">
+      <article class="repeat-row">
+        <div class="row-fields"></div>
+        <div class="row-actions">
+          <button type="button" data-action="up">上移</button>
+          <button type="button" data-action="down">下移</button>
+          <button type="button" data-action="remove">删除</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./admin.js"></script>
+  </body>
+</html>
