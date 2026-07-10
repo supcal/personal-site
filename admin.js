@@ -104,6 +104,7 @@ async function initAdmin() {
 }
 
 function renderStaticAdminNotice() {
+  setHeaderActionsEnabled(false);
   byId("admin-menu").innerHTML = "";
   byId("admin-app").innerHTML = `
     <h1>在线后台未启用</h1>
@@ -124,7 +125,17 @@ function renderStaticAdminNotice() {
   `;
 }
 
+function setHeaderActionsEnabled(enabled) {
+  const saveButton = byId("save-site");
+  const publishButton = byId("publish-site");
+  const logoutButton = byId("logout-admin");
+  if (saveButton) saveButton.disabled = !enabled;
+  if (publishButton) publishButton.disabled = !enabled;
+  if (logoutButton) logoutButton.disabled = !enabled;
+}
+
 function renderAuth(message, setupMode = false) {
+  setHeaderActionsEnabled(false);
   byId("admin-menu").innerHTML = "";
   byId("admin-app").innerHTML = `
     <h1>${setupMode ? "设置后台密码" : "后台登录"}</h1>
@@ -175,6 +186,7 @@ async function loadData() {
     throw new Error("请通过 npm start 启动本地后台服务后访问 admin.html。");
   }
   adminState.data = await res.json();
+  setHeaderActionsEnabled(true);
   renderMenu();
   render();
 }
@@ -897,12 +909,14 @@ byId("publish-site").addEventListener("click", async () => {
     renderAuth("请先登录后台。");
     return;
   }
-  if (!confirm("发布前请确认已经点击“保存全部内容”。现在要把当前网站发布到 GitHub 吗？")) return;
+  if (!confirm("现在会先保存当前后台内容，然后发布到 GitHub。确认继续吗？")) return;
   const button = byId("publish-site");
   const original = button.textContent;
   button.disabled = true;
-  button.textContent = "正在发布...";
+  button.textContent = "正在保存...";
   try {
+    await saveData();
+    button.textContent = "正在发布...";
     const res = await apiFetch("/api/publish", { method: "POST" });
     const result = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(result.error || "发布失败");
@@ -922,9 +936,11 @@ byId("logout-admin").addEventListener("click", async () => {
   adminState.token = "";
   adminState.data = null;
   sessionStorage.removeItem("academic-admin-token");
+  setHeaderActionsEnabled(false);
   renderAuth("已退出登录。");
 });
 
+setHeaderActionsEnabled(false);
 initAdmin().catch((error) => {
   byId("admin-app").innerHTML = `<p class="status">${esc(error.message)}</p>`;
 });
