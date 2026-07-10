@@ -261,9 +261,11 @@ function serveStatic(req, res) {
   }
 
   const ext = path.extname(filePath).toLowerCase();
+  const baseName = path.basename(filePath).toLowerCase();
+  const noStoreFiles = new Set(["admin.html", "admin.js", "server.js", "package.json"]);
   res.writeHead(200, {
     "Content-Type": mimeTypes[ext] || "application/octet-stream",
-    "Cache-Control": ext === ".json" ? "no-store" : "public, max-age=300"
+    "Cache-Control": ext === ".json" || noStoreFiles.has(baseName) ? "no-store" : "public, max-age=300"
   });
   fs.createReadStream(filePath).pipe(res);
 }
