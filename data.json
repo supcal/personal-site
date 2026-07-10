@@ -6,6 +6,14 @@
   "titles": "副教授 / 硕士导师 / 工学博士",
   "email": "superlee@tjnu.edu.cn",
   "portrait": "https://xxgc.tjnu.edu.cn/__local/1/F3/49/5EAA330131F55FCED9FB622694C_AC38FA7A_112AC.jpg",
+  "portrait_scale": "1",
+  "portrait_x": "50",
+  "portrait_y": "50",
+  "links": [
+    { "label": "Email", "url": "mailto:superlee@tjnu.edu.cn", "icon": "mail" },
+    { "label": "Official", "url": "https://xxgc.tjnu.edu.cn/info/1166/3643.htm", "icon": "building" },
+    { "label": "GitHub", "url": "https://github.com/supcal/personal-site", "icon": "code" }
+  ],
   "hero_kicker": "Artificial Intelligence · Affective Computing · BCI",
   "hero_title": "面向多模态智能感知与情感计算的研究与教学",
   "hero_summary": "我主要从事人工智能、深度学习、情感计算与脑机接口相关研究，关注脑电、语音、近红外等多模态生理与行为数据的表征学习、融合建模和智能分析。",
@@ -57,23 +65,38 @@
   "publications": [
     {
       "year": "2024",
-      "text": "Chao Li, Ning Bian, Ziping Zhao*, Haishuai Wang, Björn Schuller. Multi-view domain-adaptive representation learning for EEG-based emotion recognition. Information Fusion, 104: 102156."
+      "text": "Chao Li, Ning Bian, Ziping Zhao*, Haishuai Wang, Björn Schuller. Multi-view domain-adaptive representation learning for EEG-based emotion recognition. Information Fusion, 104: 102156.",
+      "paper_url": "",
+      "pdf_url": "",
+      "code_url": ""
     },
     {
       "year": "2024",
-      "text": "Chao Li, Feng Wang, Ziping Zhao*, Haishuai Wang, Björn Schuller. Attention-based Temporal Graph Representation Learning for EEG-based Emotion Recognition. IEEE Journal of Biomedical and Health Informatics."
+      "text": "Chao Li, Feng Wang, Ziping Zhao*, Haishuai Wang, Björn Schuller. Attention-based Temporal Graph Representation Learning for EEG-based Emotion Recognition. IEEE Journal of Biomedical and Health Informatics.",
+      "paper_url": "",
+      "pdf_url": "",
+      "code_url": ""
     },
     {
       "year": "2020",
-      "text": "Chao Li, Zhongtian Bao, Linhao Li, Ziping Zhao. Exploring Temporal Representations by Leveraging Attention-Based Bidirectional LSTM-RNNs for Multi-Modal Emotion Recognition. Information Processing & Management, 57(3): 102185."
+      "text": "Chao Li, Zhongtian Bao, Linhao Li, Ziping Zhao. Exploring Temporal Representations by Leveraging Attention-Based Bidirectional LSTM-RNNs for Multi-Modal Emotion Recognition. Information Processing & Management, 57(3): 102185.",
+      "paper_url": "",
+      "pdf_url": "",
+      "code_url": ""
     },
     {
       "year": "2022",
-      "text": "Chao Li, Yong Sheng, Haishuai Wang, Mingyue Niu, Peiguang Jing, Ziping Zhao, Björn W. Schuller. EEG Emotion Recognition Based on Self-attention Dynamic Graph Neural Networks. EMBC."
+      "text": "Chao Li, Yong Sheng, Haishuai Wang, Mingyue Niu, Peiguang Jing, Ziping Zhao, Björn W. Schuller. EEG Emotion Recognition Based on Self-attention Dynamic Graph Neural Networks. EMBC.",
+      "paper_url": "",
+      "pdf_url": "",
+      "code_url": ""
     },
     {
       "year": "2021",
-      "text": "Chao Li, Boyang Chen, Ziping Zhao, Nicholas Cummins, Björn W. Schuller. Hierarchical Attention-Based Temporal Convolutional Networks for EEG-Based Emotion Recognition. ICASSP."
+      "text": "Chao Li, Boyang Chen, Ziping Zhao, Nicholas Cummins, Björn W. Schuller. Hierarchical Attention-Based Temporal Convolutional Networks for EEG-Based Emotion Recognition. ICASSP.",
+      "paper_url": "",
+      "pdf_url": "",
+      "code_url": ""
     }
   ],
   "courses": [
