@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>我的个人网站</title>
+    <meta
+      name="description"
+      content="个人主页，展示教学、人工智能应用、项目实践与联系方式。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="回到首页">个人主页</a>
+      <nav class="nav" aria-label="主要导航">
+        <a href="#about">关于我</a>
+        <a href="#work">方向</a>
+        <a href="#projects">项目</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media" aria-hidden="true">
+          <div class="hero-grid"></div>
+          <div class="hero-panel">
+            <span>AI</span>
+            <span>Education</span>
+            <span>Practice</span>
+          </div>
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">教育技术 / 人工智能应用 / 课程建设</p>
+          <h1 id="hero-title">把技术变成可理解、可使用、可持续的教学实践。</h1>
+          <p class="hero-text">
+            你好，我是一名关注人工智能赋能教育教学的实践者。这个网站用于整理我的课程建设、工具探索、培训材料与项目经验。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#projects">查看项目</a>
+            <a class="button secondary" href="#contact">联系我</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="section about-section">
+        <div>
+          <p class="section-kicker">About</p>
+          <h2>关于我</h2>
+        </div>
+        <div class="about-text">
+          <p>
+            我长期关注教育教学中的真实问题，尤其是课程设计、教学资源建设、教师数字素养提升，以及生成式人工智能在教学、教辅和学习支持中的落地应用。
+          </p>
+          <p>
+            我喜欢把复杂的新技术拆解成教师能马上使用的小流程、小工具和小练习，让技术服务课堂，而不是喧宾夺主。
+          </p>
+        </div>
+      </section>
+
+      <section id="work" class="section">
+        <div class="section-heading">
+          <p class="section-kicker">Focus</p>
+          <h2>我正在关注的方向</h2>
+        </div>
+        <div class="focus-grid">
+          <article class="focus-item">
+            <span class="item-number">01</span>
+            <h3>AI 教学助理</h3>
+            <p>探索智能体在备课、学情分析、答疑支持和教学反馈中的应用。</p>
+          </article>
+          <article class="focus-item">
+            <span class="item-number">02</span>
+            <h3>课程与资源建设</h3>
+            <p>围绕专业培养目标，建设结构清晰、可复用、便于持续迭代的课程资源。</p>
+          </article>
+          <article class="focus-item">
+            <span class="item-number">03</span>
+            <h3>教师培训设计</h3>
+            <p>设计短时、高密度、可操作的培训活动，帮助教师快速形成实践经验。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="projects" class="section projects-section">
+        <div class="section-heading">
+          <p class="section-kicker">Projects</p>
+          <h2>项目与作品</h2>
+        </div>
+        <div class="project-list">
+          <article class="project-card">
+            <div>
+              <p class="project-meta">Training Material</p>
+              <h3>人工智能赋能教育教学培训</h3>
+            </div>
+            <p>面向教师的 AI 应用培训材料，覆盖文生文、图像生成、智能体教学助理与进阶应用展望。</p>
+          </article>
+          <article class="project-card">
+            <div>
+              <p class="project-meta">Workshop</p>
+              <h3>文生文 5 分钟微练习</h3>
+            </div>
+            <p>用一个极短任务帮助教师体验提示词、改写、生成与评价之间的关系。</p>
+          </article>
+          <article class="project-card">
+            <div>
+              <p class="project-meta">Practice</p>
+              <h3>图像生成 10 分钟练习</h3>
+            </div>
+            <p>把抽象的视觉表达需求转化成可执行的提示词，让教师快速理解图像生成工作流。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="section contact-section">
+        <div>
+          <p class="section-kicker">Contact</p>
+          <h2>欢迎交流</h2>
+        </div>
+        <div class="contact-panel">
+          <p>如果你对 AI 教学应用、课程资源建设或教师培训感兴趣，欢迎联系我。</p>
+          <a class="button primary" href="mailto:your-email@example.com">your-email@example.com</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> 我的个人网站</span>
+      <a href="#top">返回顶部</a>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
