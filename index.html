@@ -8,6 +8,7 @@
       name="description"
       content="李超，天津师范大学计算机与信息工程学院副教授、硕士导师。研究方向包括人工智能、深度学习、情感计算、脑机接口。"
     />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -20,7 +21,6 @@
         <a href="#publications">论文</a>
         <a href="#teaching">教学</a>
         <a href="#contact">联系</a>
-        <a href="./admin.html">编辑</a>
       </nav>
     </header>
 
@@ -46,12 +46,17 @@
               <dd data-field="affiliation_en"></dd>
             </div>
           </dl>
+          <div class="profile-links" data-list="links"></div>
         </aside>
 
         <div class="hero-copy">
           <p class="eyebrow" data-field="hero_kicker"></p>
           <h2 data-field="hero_title"></h2>
           <p data-field="hero_summary"></p>
+          <div class="hero-actions">
+            <a class="button" href="#publications">代表论文</a>
+            <a class="button secondary-button" href="#projects">科研项目</a>
+          </div>
           <div class="hero-stats" data-list="stats" aria-label="学术概览"></div>
         </div>
       </section>
@@ -83,7 +88,7 @@
       <section id="publications" class="section">
         <div class="section-title compact">
           <p class="eyebrow">Publications</p>
-          <h2>代表性论文</h2>
+          <h2>代表性论文 <a class="more-link" href="./publications.html">more</a></h2>
         </div>
         <div class="publication-list" data-list="publications"></div>
       </section>
