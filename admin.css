@@ -150,6 +150,12 @@ label {
   font-weight: 900;
 }
 
+.field-help {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 input,
 textarea {
   width: 100%;
