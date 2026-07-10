@@ -1,400 +1,809 @@
-const schemas = {
-  stats: {
-    label: "学术概览",
-    addText: "添加概览",
-    fields: [
-      ["value", "数字"],
-      ["label", "说明"],
-    ],
-    empty: { value: "", label: "" },
-  },
-  links: {
-    label: "图标链接",
-    addText: "添加链接",
-    fields: [
-      ["label", "名称"],
-      ["url", "地址"],
-      ["icon", "图标 mail/building/code/link"],
-    ],
-    empty: { label: "", url: "", icon: "link" },
-  },
-  profile: {
-    label: "简介段落",
-    addText: "添加段落",
-    type: "text",
-    empty: "",
-  },
-  research: {
-    label: "研究方向",
-    addText: "添加研究方向",
-    fields: [
-      ["title", "标题"],
-      ["description", "说明", "textarea"],
-    ],
-    empty: { title: "", description: "" },
-  },
-  projects: {
-    label: "科研项目",
-    addText: "添加项目",
-    fields: [
-      ["period", "时间"],
-      ["title", "项目名称"],
-      ["description", "说明", "textarea"],
-    ],
-    empty: { period: "", title: "", description: "" },
-  },
-  publications: {
-    label: "代表性论文",
-    addText: "添加论文",
-    fields: [
-      ["year", "年份"],
-      ["text", "论文信息", "textarea"],
-      ["paper_url", "论文网址"],
-      ["pdf_url", "PDF 链接"],
-      ["code_url", "代码链接"],
-    ],
-    empty: { year: "", text: "", paper_url: "", pdf_url: "", code_url: "" },
-  },
-  courses: {
-    label: "讲授课程",
-    addText: "添加课程",
-    type: "text",
-    empty: "",
-  },
-  awards: {
-    label: "奖励情况",
-    addText: "添加奖励",
-    type: "text",
-    empty: "",
-  },
+const adminState = {
+  data: null,
+  module: "profile",
+  editing: null,
+  importPreview: [],
+  token: sessionStorage.getItem("academic-admin-token") || ""
 };
 
-let siteData = {};
-let isDirty = false;
+const modules = [
+  ["profile", "个人信息"],
+  ["research", "研究方向"],
+  ["publications", "论文发表"],
+  ["projects", "科研项目"],
+  ["teaching", "教学课程"],
+  ["admissions", "招生信息"],
+  ["news", "新闻动态"],
+  ["team", "团队成员"],
+  ["resources", "资源下载"],
+  ["raw", "原始 JSON"]
+];
 
-const storageKey = "personal-site-editor-draft";
-const authKey = "personal-site-editor-auth";
-const passwordHash = "5c130f4a86c9beb7406caf830eec4414010c5132fcae42875768efb6c6417c45";
-const repoOwner = "supcal";
-const repoName = "personal-site";
-const dataPath = "data.json";
-const clone = (value) => JSON.parse(JSON.stringify(value));
-const inputFor = (path) => document.querySelector(`[data-path="${path}"]`);
+const publicationTypes = [
+  ["journal_article", "期刊论文"],
+  ["conference_paper", "会议论文"],
+  ["degree_thesis", "学位论文"],
+  ["preprint", "预印本"],
+  ["patent", "专利"],
+  ["software_copyright", "软著"],
+  ["book_or_textbook", "著作/教材"]
+];
 
-const hashText = async (text) => {
-  const bytes = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-};
+function uid(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+}
 
-const unlockEditor = () => {
-  document.body.classList.remove("locked");
-  document.querySelector("#authScreen").hidden = true;
-};
+function byId(id) {
+  return document.getElementById(id);
+}
 
-const bindAuth = () => {
-  if (sessionStorage.getItem(authKey) === "ok") {
-    unlockEditor();
+function esc(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getLocalized(value, locale) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value[locale] || "";
+}
+
+function setLocalized(target, field, zh, en) {
+  target[field] = { zh: zh || "", en: en || "" };
+}
+
+function splitTags(value) {
+  return String(value || "")
+    .split(/[,，;；\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function joinTags(value) {
+  return Array.isArray(value) ? value.join(", ") : "";
+}
+
+function optionList(items, selected) {
+  return items.map(([value, label]) => `<option value="${esc(value)}" ${value === selected ? "selected" : ""}>${esc(label)}</option>`).join("");
+}
+
+async function apiFetch(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (adminState.token) headers.set("Authorization", `Bearer ${adminState.token}`);
+  const res = await fetch(url, { ...options, headers });
+  if (res.status === 401) {
+    adminState.token = "";
+    sessionStorage.removeItem("academic-admin-token");
+    renderAuth("登录已过期，请重新输入密码。");
+    throw new Error("Admin login required.");
+  }
+  return res;
+}
+
+async function initAdmin() {
+  const res = await fetch("/api/admin/status", { cache: "no-store" }).catch(() => null);
+  if (!res || !res.ok) {
+    renderStaticAdminNotice();
     return;
   }
+  const status = await res.json();
+  if (!status.configured) {
+    renderAuth("首次使用，请先设置后台密码。", true);
+    return;
+  }
+  if (!adminState.token) {
+    renderAuth("请输入后台密码。");
+    return;
+  }
+  loadData().catch(() => renderAuth("登录已过期，请重新输入密码。"));
+}
 
-  document.querySelector("#authForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const password = document.querySelector("#editorPassword").value;
-    const error = document.querySelector("#authError");
-    if ((await hashText(password)) === passwordHash) {
-      sessionStorage.setItem(authKey, "ok");
-      unlockEditor();
-      return;
+function renderStaticAdminNotice() {
+  byId("admin-menu").innerHTML = "";
+  byId("admin-app").innerHTML = `
+    <h1>在线后台未启用</h1>
+    <p class="status">这个页面现在运行在 GitHub Pages 静态环境中，不能直接保存内容到仓库。为了安全写入 GitHub，需要 GitHub 登录/OAuth 或本地发布流程。</p>
+    <div class="list">
+      <article class="list-item">
+        <h3>最简单的维护方式</h3>
+        <p>在自己的电脑上运行 <code>npm start</code>，打开 <code>http://localhost:5173/admin.html</code>，输入后台密码后可视化修改内容，再推送到 GitHub。</p>
+      </article>
+      <article class="list-item">
+        <h3>后续升级</h3>
+        <p>如果要真正在线修改，需要接入 GitHub OAuth 或访问控制服务。普通前端密码无法安全地写入 GitHub 仓库。</p>
+      </article>
+    </div>
+    <div class="hero-actions">
+      <a class="button-primary" href="index.html">返回网站</a>
+    </div>
+  `;
+}
+
+function renderAuth(message, setupMode = false) {
+  byId("admin-menu").innerHTML = "";
+  byId("admin-app").innerHTML = `
+    <h1>${setupMode ? "设置后台密码" : "后台登录"}</h1>
+    <p class="status">${esc(message || "")}</p>
+    <div class="form-grid">
+      <div class="field full">
+        <label>后台密码</label>
+        <input id="admin-password" type="password" autocomplete="${setupMode ? "new-password" : "current-password"}" placeholder="至少 8 位">
+      </div>
+      ${setupMode ? `<div class="field full"><label>再次输入密码</label><input id="admin-password-confirm" type="password" autocomplete="new-password"></div>` : ""}
+    </div>
+    <div class="hero-actions">
+      <button type="button" id="admin-login" class="button-primary">${setupMode ? "设置并进入后台" : "进入后台"}</button>
+      <a class="button-secondary" href="index.html">返回网站预览</a>
+    </div>
+    <p class="status">提示：这个密码保护的是本地管理后台。真正上线后的在线后台，后续还应接 GitHub 登录或访问控制服务。</p>
+  `;
+  byId("admin-login").addEventListener("click", () => submitAuth(setupMode));
+  byId("admin-password").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") submitAuth(setupMode);
+  });
+}
+
+async function submitAuth(setupMode) {
+  const password = byId("admin-password").value;
+  if (setupMode && password !== byId("admin-password-confirm").value) {
+    renderAuth("两次输入的密码不一致。", true);
+    return;
+  }
+  const res = await fetch(setupMode ? "/api/admin/setup" : "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+  const result = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    renderAuth(result.error || "密码验证失败。", setupMode);
+    return;
+  }
+  adminState.token = result.token;
+  sessionStorage.setItem("academic-admin-token", adminState.token);
+  await loadData();
+}
+
+async function loadData() {
+  const res = await apiFetch("/api/site", { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("请通过 npm start 启动本地后台服务后访问 admin.html。");
+  }
+  adminState.data = await res.json();
+  renderMenu();
+  render();
+}
+
+async function saveData() {
+  adminState.data.meta.updatedAt = new Date().toISOString().slice(0, 10);
+  const res = await apiFetch("/api/site", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(adminState.data)
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "保存失败");
+  }
+  toast("已保存到 data/site.json，并自动生成备份。");
+}
+
+function toast(message) {
+  const panel = byId("admin-app");
+  const note = document.createElement("div");
+  note.className = "status";
+  note.textContent = message;
+  panel.prepend(note);
+  setTimeout(() => note.remove(), 4200);
+}
+
+function renderMenu() {
+  byId("admin-menu").innerHTML = modules.map(([key, label]) => (
+    `<button type="button" data-module="${key}" class="${adminState.module === key ? "active" : ""}">${label}</button>`
+  )).join("");
+  byId("admin-menu").addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-module]");
+    if (!button) return;
+    adminState.module = button.dataset.module;
+    adminState.editing = null;
+    adminState.importPreview = [];
+    renderMenu();
+    render();
+  });
+}
+
+function localizedFields(base, label, value = {}) {
+  return `
+    <div class="field">
+      <label>${label}（中文）</label>
+      <input id="${base}-zh" value="${esc(getLocalized(value, "zh"))}">
+    </div>
+    <div class="field">
+      <label>${label}（英文）</label>
+      <input id="${base}-en" value="${esc(getLocalized(value, "en"))}">
+    </div>
+  `;
+}
+
+function localizedTextarea(base, label, value = {}) {
+  return `
+    <div class="field">
+      <label>${label}（中文）</label>
+      <textarea id="${base}-zh">${esc(getLocalized(value, "zh"))}</textarea>
+    </div>
+    <div class="field">
+      <label>${label}（英文）</label>
+      <textarea id="${base}-en">${esc(getLocalized(value, "en"))}</textarea>
+    </div>
+  `;
+}
+
+function renderProfile() {
+  const profile = adminState.data.profile;
+  return `
+    <div class="toolbar"><h1>个人信息</h1><button type="button" id="save-profile">应用修改</button></div>
+    <div class="form-grid">
+      ${localizedFields("name", "姓名", profile.name)}
+      ${localizedFields("title", "职称/身份", profile.title)}
+      ${localizedFields("affiliation", "单位", profile.affiliation)}
+      <div class="field"><label>邮箱</label><input id="email" value="${esc(profile.email)}"></div>
+      <div class="field"><label>电话</label><input id="phone" value="${esc(profile.phone)}"></div>
+      <div class="field"><label>办公室</label><input id="office" value="${esc(profile.office)}"></div>
+      <div class="field"><label>工作照 URL</label><input id="photo" value="${esc(profile.photo)}"></div>
+      <div class="field"><label>上传工作照</label><input id="photo-file" type="file" accept="image/*"></div>
+      <div class="field full"><label>关键词，用逗号分隔</label><input id="keywords" value="${esc(joinTags(profile.keywords))}"></div>
+      ${localizedTextarea("summary", "首页摘要", profile.summary)}
+      ${localizedTextarea("bio", "个人简介", profile.bio)}
+    </div>
+  `;
+}
+
+function bindProfile() {
+  byId("save-profile").addEventListener("click", async () => {
+    const profile = adminState.data.profile;
+    setLocalized(profile, "name", byId("name-zh").value, byId("name-en").value);
+    setLocalized(profile, "title", byId("title-zh").value, byId("title-en").value);
+    setLocalized(profile, "affiliation", byId("affiliation-zh").value, byId("affiliation-en").value);
+    setLocalized(profile, "summary", byId("summary-zh").value, byId("summary-en").value);
+    setLocalized(profile, "bio", byId("bio-zh").value, byId("bio-en").value);
+    profile.email = byId("email").value.trim();
+    profile.phone = byId("phone").value.trim();
+    profile.office = byId("office").value.trim();
+    profile.photo = byId("photo").value.trim();
+    profile.keywords = splitTags(byId("keywords").value);
+    const file = byId("photo-file").files[0];
+    if (file) {
+      profile.photo = await uploadFile(file, "images");
     }
-    error.textContent = "密码不正确";
+    toast("个人信息已应用。记得保存全部内容。");
+    render();
   });
-};
+}
 
-const setByPath = (path, value) => {
-  siteData[path] = value;
-};
+function renderListModule(key, title, columns, formRenderer) {
+  const rows = adminState.data[key] || [];
+  const editingItem = rows.find((item) => item.id === adminState.editing) || null;
+  return `
+    <div class="toolbar">
+      <h1>${title}</h1>
+      <button type="button" id="new-item">新增</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${columns.map((col) => `<th>${col.label}</th>`).join("")}<th>操作</th></tr></thead>
+        <tbody>
+          ${rows.map((item) => `<tr>${columns.map((col) => `<td>${esc(col.value(item))}</td>`).join("")}<td><button type="button" data-edit="${item.id}">编辑</button> <button type="button" class="danger" data-delete="${item.id}">删除</button></td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <hr>
+    ${formRenderer(editingItem)}
+  `;
+}
 
-const updateSaveStatus = (message) => {
-  const status = document.querySelector("#saveStatus");
-  if (status) status.textContent = message;
-};
-
-const markDirty = () => {
-  isDirty = true;
-  updateSaveStatus("有未保存修改");
-};
-
-const makeLabel = (labelText, input) => {
-  const label = document.createElement("label");
-  label.textContent = labelText;
-  label.append(input);
-  return label;
-};
-
-const makeInput = (value, onInput, multiline = false) => {
-  const input = document.createElement(multiline ? "textarea" : "input");
-  if (multiline) input.rows = 3;
-  input.value = value || "";
-  input.addEventListener("input", () => {
-    onInput(input.value);
-    markDirty();
-    renderAll();
+function bindListModule(key, emptyFactory, collect) {
+  byId("new-item").addEventListener("click", () => {
+    const item = emptyFactory();
+    adminState.data[key].push(item);
+    adminState.editing = item.id;
+    render();
   });
-  return input;
-};
-
-const renderRepeatable = (key) => {
-  const schema = schemas[key];
-  const container = document.querySelector(`[data-repeat="${key}"]`);
-  const template = document.querySelector("#rowTemplate");
-  if (!container || !template) return;
-
-  if (!Array.isArray(siteData[key])) siteData[key] = [];
-  container.dataset.label = schema.label;
-  container.replaceChildren();
-
-  siteData[key].forEach((item, index) => {
-    const row = template.content.firstElementChild.cloneNode(true);
-    const fields = row.querySelector(".row-fields");
-
-    if (schema.type === "text") {
-      fields.append(
-        makeLabel(
-          "内容",
-          makeInput(item, (value) => {
-            siteData[key][index] = value;
-          }, true),
-        ),
-      );
-    } else {
-      schema.fields.forEach(([field, labelText, type]) => {
-        const input = makeInput(item[field], (value) => {
-          siteData[key][index][field] = value;
-        }, type === "textarea");
-        const label = makeLabel(labelText, input);
-        if (type === "textarea") label.classList.add("full");
-        fields.append(label);
-      });
-
-      if (key === "publications") {
-        const upload = document.createElement("input");
-        upload.type = "file";
-        upload.accept = "application/pdf";
-        upload.addEventListener("change", () => {
-          const [file] = upload.files;
-          if (!file) return;
-          const reader = new FileReader();
-          reader.addEventListener("load", () => {
-            siteData[key][index].pdf_url = reader.result;
-            markDirty();
-            renderAll();
-          });
-          reader.readAsDataURL(file);
-        });
-        fields.append(makeLabel("上传 PDF", upload));
-      }
-    }
-
-    row.querySelector('[data-action="remove"]').addEventListener("click", () => {
-      siteData[key].splice(index, 1);
-      markDirty();
-      renderAll();
+  byId("admin-app").querySelectorAll("[data-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      adminState.editing = button.dataset.edit;
+      render();
     });
-
-    row.querySelector('[data-action="up"]').addEventListener("click", () => {
-      if (index === 0) return;
-      [siteData[key][index - 1], siteData[key][index]] = [
-        siteData[key][index],
-        siteData[key][index - 1],
-      ];
-      markDirty();
-      renderAll();
+  });
+  byId("admin-app").querySelectorAll("[data-delete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!confirm("确认删除这条内容？保存前仍只是在内存中修改。")) return;
+      adminState.data[key] = adminState.data[key].filter((item) => item.id !== button.dataset.delete);
+      adminState.editing = null;
+      render();
     });
-
-    row.querySelector('[data-action="down"]').addEventListener("click", () => {
-      if (index === siteData[key].length - 1) return;
-      [siteData[key][index + 1], siteData[key][index]] = [
-        siteData[key][index],
-        siteData[key][index + 1],
-      ];
-      markDirty();
-      renderAll();
+  });
+  const save = byId("save-item");
+  if (save) {
+    save.addEventListener("click", async () => {
+      const item = adminState.data[key].find((entry) => entry.id === adminState.editing);
+      await collect(item);
+      toast("条目已应用。记得保存全部内容。");
+      render();
     });
-
-    container.append(row);
-  });
-
-  const add = document.createElement("button");
-  add.type = "button";
-  add.className = "add-row";
-  add.textContent = schema.addText;
-  add.addEventListener("click", () => {
-    siteData[key].push(clone(schema.empty));
-    markDirty();
-    renderAll();
-  });
-  container.append(add);
-};
-
-const updatePrimitiveInputs = () => {
-  document.querySelectorAll("[data-path]").forEach((input) => {
-    input.value = siteData[input.dataset.path] || "";
-  });
-};
-
-const updatePreview = () => {
-  document.querySelector("#previewKicker").textContent = siteData.hero_kicker || "";
-  document.querySelector("#previewTitle").textContent = siteData.hero_title || "";
-  document.querySelector("#previewSummary").textContent = siteData.hero_summary || "";
-  document.querySelector("#previewName").textContent = siteData.name || "";
-  document.querySelector("#previewEmail").textContent = siteData.email || "";
-
-  const portrait = document.querySelector("#previewPortrait");
-  portrait.src = siteData.portrait || "";
-  portrait.style.objectPosition = `${siteData.portrait_x || 50}% ${siteData.portrait_y || 50}%`;
-  portrait.style.transform = `scale(${siteData.portrait_scale || 1})`;
-
-  document.querySelector("#jsonPreview").value = JSON.stringify(siteData, null, 2);
-};
-
-const renderAll = () => {
-  updatePrimitiveInputs();
-  Object.keys(schemas).forEach(renderRepeatable);
-  updatePreview();
-};
-
-const saveDraft = () => {
-  localStorage.setItem(storageKey, JSON.stringify(siteData));
-  isDirty = false;
-  updateSaveStatus(`已保存到浏览器草稿：${new Date().toLocaleString()}`);
-};
-
-const encodeBase64Utf8 = (text) => {
-  const bytes = new TextEncoder().encode(text);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary);
-};
-
-const publishToGitHub = async () => {
-  const token = document.querySelector("#githubToken").value.trim();
-  if (!token) {
-    saveDraft();
-    updateSaveStatus("已保存草稿。要直接发布到网站，请先填写 GitHub Token。");
-    return;
   }
+}
 
-  const bodyText = JSON.stringify(siteData, null, 2);
-  if (bodyText.length > 900000) {
-    updateSaveStatus("内容太大，可能无法直接发布。请压缩图片/PDF，或把文件上传到仓库后填写链接。");
-    return;
-  }
+function renderResearchForm(item) {
+  if (!item) return `<p class="status">请选择一条研究方向编辑，或点击新增。</p>`;
+  return `
+    <h2>编辑研究方向</h2>
+    <div class="form-grid">
+      ${localizedFields("title", "标题", item.title)}
+      ${localizedTextarea("summary", "简介", item.summary)}
+      <div class="field full"><label>关键词</label><input id="keywords" value="${esc(joinTags(item.keywords))}"></div>
+      <div class="field"><label>排序</label><input id="order" type="number" value="${esc(item.order)}"></div>
+    </div>
+    <button type="button" id="save-item">应用条目</button>
+  `;
+}
 
-  updateSaveStatus("正在发布到 GitHub...");
-  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${dataPath}`;
-  const headers = {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token}`,
-    "X-GitHub-Api-Version": "2022-11-28",
+function renderResearchAdmin() {
+  return renderListModule("research", "研究方向", [
+    { label: "标题", value: (item) => getLocalized(item.title, "zh") },
+    { label: "关键词", value: (item) => joinTags(item.keywords) },
+    { label: "排序", value: (item) => item.order }
+  ], renderResearchForm);
+}
+
+function bindResearchAdmin() {
+  bindListModule("research", () => ({
+    id: uid("research"),
+    title: { zh: "新研究方向", en: "" },
+    summary: { zh: "", en: "" },
+    keywords: [],
+    order: adminState.data.research.length + 1
+  }), (item) => {
+    setLocalized(item, "title", byId("title-zh").value, byId("title-en").value);
+    setLocalized(item, "summary", byId("summary-zh").value, byId("summary-en").value);
+    item.keywords = splitTags(byId("keywords").value);
+    item.order = Number(byId("order").value || 0);
+  });
+}
+
+function emptyPublication() {
+  return {
+    id: uid("pub"),
+    type: "journal_article",
+    title: { zh: "新论文标题", en: "" },
+    authors: "",
+    year: new Date().getFullYear(),
+    date: "",
+    venue: "",
+    levels: [],
+    jcr: "",
+    cas: "",
+    ccf: "",
+    doi: "",
+    cnki: "",
+    pdf: "",
+    projectUrl: "",
+    codeUrl: "",
+    datasetUrl: "",
+    abstract: { zh: "", en: "" },
+    keywords: [],
+    areas: [],
+    featured: false,
+    pinned: false,
+    status: "published",
+    bibtex: "",
+    citation: "",
+    notes: ""
   };
+}
 
-  const current = await fetch(`${apiUrl}?ref=main`, { headers });
-  if (!current.ok) {
-    updateSaveStatus("读取 GitHub 文件失败，请检查 Token 权限。");
-    return;
+function renderPublicationForm(item) {
+  if (!item) return `<p class="status">请选择一篇论文编辑，或点击新增论文。</p>${renderImportBox()}`;
+  return `
+    <h2>编辑论文</h2>
+    <div class="form-grid">
+      ${localizedFields("title", "标题", item.title)}
+      <div class="field"><label>类型</label><select id="type">${optionList(publicationTypes, item.type)}</select></div>
+      <div class="field"><label>年份</label><input id="year" type="number" value="${esc(item.year)}"></div>
+      <div class="field full"><label>作者</label><input id="authors" value="${esc(item.authors)}"></div>
+      <div class="field"><label>发表来源</label><input id="venue" value="${esc(item.venue)}"></div>
+      <div class="field"><label>状态</label><select id="status"><option value="published" ${item.status === "published" ? "selected" : ""}>公开</option><option value="draft" ${item.status === "draft" ? "selected" : ""}>草稿</option><option value="private" ${item.status === "private" ? "selected" : ""}>隐藏</option></select></div>
+      <div class="field"><label>级别标签</label><input id="levels" value="${esc(joinTags(item.levels))}"></div>
+      <div class="field"><label>研究方向</label><input id="areas" value="${esc(joinTags(item.areas))}"></div>
+      <div class="field"><label>关键词</label><input id="keywords" value="${esc(joinTags(item.keywords))}"></div>
+      <div class="field"><label>DOI</label><input id="doi" value="${esc(item.doi)}"></div>
+      <div class="field"><label>知网链接</label><input id="cnki" value="${esc(item.cnki)}"></div>
+      <div class="field"><label>PDF 链接</label><input id="pdf" value="${esc(item.pdf)}"></div>
+      <div class="field"><label>上传 PDF</label><input id="pdf-file" type="file" accept="application/pdf"></div>
+      <div class="field"><label>项目主页</label><input id="projectUrl" value="${esc(item.projectUrl)}"></div>
+      <div class="field"><label>代码链接</label><input id="codeUrl" value="${esc(item.codeUrl)}"></div>
+      <div class="field"><label>数据集链接</label><input id="datasetUrl" value="${esc(item.datasetUrl)}"></div>
+      <div class="field"><label>JCR 分区</label><input id="jcr" value="${esc(item.jcr)}"></div>
+      <div class="field"><label>中科院分区</label><input id="cas" value="${esc(item.cas)}"></div>
+      <div class="field"><label>CCF 等级</label><input id="ccf" value="${esc(item.ccf)}"></div>
+      ${localizedTextarea("abstract", "摘要", item.abstract)}
+      <div class="field full"><label>BibTeX</label><textarea id="bibtex">${esc(item.bibtex)}</textarea></div>
+      <div class="field full"><label>引用格式</label><textarea id="citation">${esc(item.citation)}</textarea></div>
+      <div class="field full"><label>备注（不建议公开展示）</label><textarea id="notes">${esc(item.notes)}</textarea></div>
+      <div class="field"><label><input id="featured" type="checkbox" ${item.featured ? "checked" : ""}> 代表作</label></div>
+      <div class="field"><label><input id="pinned" type="checkbox" ${item.pinned ? "checked" : ""}> 置顶</label></div>
+    </div>
+    <button type="button" id="save-item">应用论文</button>
+    ${renderImportBox()}
+  `;
+}
+
+function renderImportBox() {
+  return `
+    <hr>
+    <h2>批量导入论文</h2>
+    <p class="status">第一版支持 CSV。Excel 可先另存为 CSV 后导入；原生 XLSX 解析后续可加依赖库实现。</p>
+    <div class="form-grid">
+      <div class="field"><label>CSV 文件</label><input id="csv-file" type="file" accept=".csv,text/csv"></div>
+      <div class="field"><label>导入模式</label><select id="import-mode"><option value="append">只新增</option><option value="upsert">按 DOI 或标题+年份更新</option><option value="replace">替换全部论文</option></select></div>
+    </div>
+    <div class="hero-actions">
+      <button type="button" id="preview-import">预览导入</button>
+      <button type="button" id="apply-import">确认导入</button>
+    </div>
+    <div id="import-preview">${renderImportPreview()}</div>
+  `;
+}
+
+function renderImportPreview() {
+  if (!adminState.importPreview.length) return "";
+  return `
+    <h3>导入预览：${adminState.importPreview.length} 条</h3>
+    <div class="table-wrap"><table><thead><tr><th>标题</th><th>作者</th><th>年份</th><th>类型</th><th>来源</th></tr></thead><tbody>
+      ${adminState.importPreview.slice(0, 20).map((item) => `<tr><td>${esc(getLocalized(item.title, "zh"))}</td><td>${esc(item.authors)}</td><td>${esc(item.year)}</td><td>${esc(item.type)}</td><td>${esc(item.venue)}</td></tr>`).join("")}
+    </tbody></table></div>
+  `;
+}
+
+function renderPublicationsAdmin() {
+  return renderListModule("publications", "论文发表", [
+    { label: "标题", value: (item) => getLocalized(item.title, "zh") },
+    { label: "年份", value: (item) => item.year },
+    { label: "类型", value: (item) => publicationTypes.find(([key]) => key === item.type)?.[1] || item.type },
+    { label: "状态", value: (item) => item.status }
+  ], renderPublicationForm);
+}
+
+function bindPublicationsAdmin() {
+  bindListModule("publications", emptyPublication, async (item) => {
+    setLocalized(item, "title", byId("title-zh").value, byId("title-en").value);
+    setLocalized(item, "abstract", byId("abstract-zh").value, byId("abstract-en").value);
+    item.type = byId("type").value;
+    item.year = Number(byId("year").value || new Date().getFullYear());
+    item.authors = byId("authors").value.trim();
+    item.venue = byId("venue").value.trim();
+    item.status = byId("status").value;
+    item.levels = splitTags(byId("levels").value);
+    item.areas = splitTags(byId("areas").value);
+    item.keywords = splitTags(byId("keywords").value);
+    item.doi = byId("doi").value.trim();
+    item.cnki = byId("cnki").value.trim();
+    item.pdf = byId("pdf").value.trim();
+    item.projectUrl = byId("projectUrl").value.trim();
+    item.codeUrl = byId("codeUrl").value.trim();
+    item.datasetUrl = byId("datasetUrl").value.trim();
+    item.jcr = byId("jcr").value.trim();
+    item.cas = byId("cas").value.trim();
+    item.ccf = byId("ccf").value.trim();
+    item.bibtex = byId("bibtex").value;
+    item.citation = byId("citation").value;
+    item.notes = byId("notes").value;
+    item.featured = byId("featured").checked;
+    item.pinned = byId("pinned").checked;
+    const file = byId("pdf-file").files[0];
+    if (file) item.pdf = await uploadFile(file, "publications");
+  });
+  bindImportControls();
+}
+
+function bindImportControls() {
+  const preview = byId("preview-import");
+  const apply = byId("apply-import");
+  if (!preview || !apply) return;
+  preview.addEventListener("click", async () => {
+    const file = byId("csv-file").files[0];
+    if (!file) return toast("请先选择 CSV 文件。");
+    const text = await file.text();
+    adminState.importPreview = csvToPublications(text);
+    render();
+  });
+  apply.addEventListener("click", () => {
+    if (!adminState.importPreview.length) return toast("请先预览导入。");
+    const mode = byId("import-mode").value;
+    if (mode === "replace" && !confirm("确认用导入结果替换全部论文？保存时会生成备份。")) return;
+    if (mode === "replace") {
+      adminState.data.publications = adminState.importPreview;
+    } else {
+      adminState.importPreview.forEach((incoming) => {
+        const index = adminState.data.publications.findIndex((old) => (
+          incoming.doi && old.doi === incoming.doi
+        ) || (
+          getLocalized(old.title, "zh") === getLocalized(incoming.title, "zh") && Number(old.year) === Number(incoming.year)
+        ));
+        if (index >= 0 && mode === "upsert") adminState.data.publications[index] = { ...adminState.data.publications[index], ...incoming };
+        if (index < 0 || mode === "append") adminState.data.publications.push(incoming);
+      });
+    }
+    adminState.importPreview = [];
+    toast("导入结果已应用。请检查后保存全部内容。");
+    render();
+  });
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell);
+      if (row.some((value) => value.trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
   }
+  row.push(cell);
+  if (row.some((value) => value.trim())) rows.push(row);
+  return rows;
+}
 
-  const currentData = await current.json();
-  const response = await fetch(apiUrl, {
-    method: "PUT",
-    headers: {
-      ...headers,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "Update homepage data from visual editor",
-      content: encodeBase64Utf8(bodyText),
-      sha: currentData.sha,
-      branch: "main",
-    }),
+function csvToPublications(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map((item) => item.trim());
+  return rows.slice(1).map((row) => {
+    const record = Object.fromEntries(headers.map((header, index) => [header, row[index] || ""]));
+    const item = emptyPublication();
+    item.id = record.id || uid("pub");
+    item.title = { zh: record.title || record.title_zh || "未命名论文", en: record.title_en || "" };
+    item.type = record.type || "journal_article";
+    item.year = Number(record.year || new Date().getFullYear());
+    item.authors = record.authors || "";
+    item.venue = record.venue || record.venue_name || "";
+    item.levels = splitTags(record.levels || record.level_indexing);
+    item.doi = record.doi || "";
+    item.pdf = record.pdf || record.pdf_url || "";
+    item.cnki = record.cnki || record.cnki_url || "";
+    item.projectUrl = record.project || record.project_url || "";
+    item.codeUrl = record.code || record.code_url || "";
+    item.datasetUrl = record.dataset || record.dataset_url || "";
+    item.abstract = { zh: record.abstract || record.abstract_zh || "", en: record.abstract_en || "" };
+    item.keywords = splitTags(record.keywords);
+    item.areas = splitTags(record.areas || record.research_area);
+    item.featured = ["true", "1", "yes", "是"].includes(String(record.featured).toLowerCase());
+    item.status = record.visibility === "private" ? "private" : (record.status || "published");
+    return item;
   });
+}
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    updateSaveStatus(`发布失败：${error.message || response.status}`);
-    return;
-  }
+function renderGenericForm(item, config) {
+  if (!item) return `<p class="status">请选择一条内容编辑，或点击新增。</p>`;
+  return `
+    <h2>编辑${config.singular}</h2>
+    <div class="form-grid">
+      ${localizedFields("title", config.titleLabel, item[config.titleField])}
+      ${config.extra(item)}
+    </div>
+    <button type="button" id="save-item">应用条目</button>
+  `;
+}
 
-  localStorage.removeItem(storageKey);
-  isDirty = false;
-  updateSaveStatus(`已发布到 GitHub：${new Date().toLocaleString()}，网站稍后自动更新。`);
+function genericModule(key, config) {
+  return {
+    render: () => renderListModule(key, config.title, config.columns, (item) => renderGenericForm(item, config)),
+    bind: () => bindListModule(key, config.empty, config.collect)
+  };
+}
+
+const genericModules = {
+  projects: genericModule("projects", {
+    title: "科研项目",
+    singular: "项目",
+    titleField: "title",
+    titleLabel: "项目名称",
+    columns: [
+      { label: "项目", value: (item) => getLocalized(item.title, "zh") },
+      { label: "时间", value: (item) => item.period },
+      { label: "状态", value: (item) => item.status }
+    ],
+    empty: () => ({ id: uid("project"), title: { zh: "新项目", en: "" }, role: { zh: "", en: "" }, period: "", source: "", summary: { zh: "", en: "" }, status: "active", order: adminState.data.projects.length + 1 }),
+    extra: (item) => `${localizedFields("role", "角色", item.role)}${localizedTextarea("summary", "简介", item.summary)}<div class="field"><label>时间</label><input id="period" value="${esc(item.period)}"></div><div class="field"><label>来源</label><input id="source" value="${esc(item.source)}"></div><div class="field"><label>状态</label><input id="status" value="${esc(item.status)}"></div><div class="field"><label>排序</label><input id="order" type="number" value="${esc(item.order)}"></div>`,
+    collect: (item) => { setLocalized(item, "title", byId("title-zh").value, byId("title-en").value); setLocalized(item, "role", byId("role-zh").value, byId("role-en").value); setLocalized(item, "summary", byId("summary-zh").value, byId("summary-en").value); item.period = byId("period").value; item.source = byId("source").value; item.status = byId("status").value; item.order = Number(byId("order").value || 0); }
+  }),
+  teaching: genericModule("teaching", {
+    title: "教学课程",
+    singular: "课程",
+    titleField: "name",
+    titleLabel: "课程名称",
+    columns: [
+      { label: "课程", value: (item) => getLocalized(item.name, "zh") },
+      { label: "对象", value: (item) => getLocalized(item.audience, "zh") },
+      { label: "学期", value: (item) => item.semester }
+    ],
+    empty: () => ({ id: uid("course"), name: { zh: "新课程", en: "" }, audience: { zh: "", en: "" }, semester: "", summary: { zh: "", en: "" }, order: adminState.data.teaching.length + 1 }),
+    extra: (item) => `${localizedFields("audience", "授课对象", item.audience)}${localizedTextarea("summary", "课程简介", item.summary)}<div class="field"><label>学期</label><input id="semester" value="${esc(item.semester)}"></div><div class="field"><label>排序</label><input id="order" type="number" value="${esc(item.order)}"></div>`,
+    collect: (item) => { setLocalized(item, "name", byId("title-zh").value, byId("title-en").value); setLocalized(item, "audience", byId("audience-zh").value, byId("audience-en").value); setLocalized(item, "summary", byId("summary-zh").value, byId("summary-en").value); item.semester = byId("semester").value; item.order = Number(byId("order").value || 0); }
+  }),
+  news: genericModule("news", {
+    title: "新闻动态",
+    singular: "新闻",
+    titleField: "title",
+    titleLabel: "新闻标题",
+    columns: [
+      { label: "标题", value: (item) => getLocalized(item.title, "zh") },
+      { label: "日期", value: (item) => item.date },
+      { label: "发布", value: (item) => item.published ? "是" : "否" }
+    ],
+    empty: () => ({ id: uid("news"), title: { zh: "新动态", en: "" }, date: new Date().toISOString().slice(0, 10), cover: "", body: { zh: "", en: "" }, published: true }),
+    extra: (item) => `${localizedTextarea("body", "正文", item.body)}<div class="field"><label>日期</label><input id="date" type="date" value="${esc(item.date)}"></div><div class="field"><label>封面图 URL</label><input id="cover" value="${esc(item.cover)}"></div><div class="field"><label><input id="published" type="checkbox" ${item.published ? "checked" : ""}> 发布</label></div>`,
+    collect: (item) => { setLocalized(item, "title", byId("title-zh").value, byId("title-en").value); setLocalized(item, "body", byId("body-zh").value, byId("body-en").value); item.date = byId("date").value; item.cover = byId("cover").value; item.published = byId("published").checked; }
+  }),
+  team: genericModule("team", {
+    title: "团队成员",
+    singular: "成员",
+    titleField: "name",
+    titleLabel: "姓名",
+    columns: [
+      { label: "姓名", value: (item) => getLocalized(item.name, "zh") },
+      { label: "身份", value: (item) => getLocalized(item.role, "zh") },
+      { label: "研究方向", value: (item) => getLocalized(item.research, "zh") }
+    ],
+    empty: () => ({ id: uid("team"), name: { zh: "新成员", en: "" }, role: { zh: "", en: "" }, research: { zh: "", en: "" }, email: "", photo: "", order: adminState.data.team.length + 1 }),
+    extra: (item) => `${localizedFields("role", "身份", item.role)}${localizedTextarea("research", "研究方向", item.research)}<div class="field"><label>邮箱</label><input id="email" value="${esc(item.email)}"></div><div class="field"><label>照片 URL</label><input id="photo" value="${esc(item.photo)}"></div><div class="field"><label>排序</label><input id="order" type="number" value="${esc(item.order)}"></div>`,
+    collect: (item) => { setLocalized(item, "name", byId("title-zh").value, byId("title-en").value); setLocalized(item, "role", byId("role-zh").value, byId("role-en").value); setLocalized(item, "research", byId("research-zh").value, byId("research-en").value); item.email = byId("email").value; item.photo = byId("photo").value; item.order = Number(byId("order").value || 0); }
+  }),
+  resources: genericModule("resources", {
+    title: "资源下载",
+    singular: "资源",
+    titleField: "title",
+    titleLabel: "资源标题",
+    columns: [
+      { label: "标题", value: (item) => getLocalized(item.title, "zh") },
+      { label: "分类", value: (item) => item.category },
+      { label: "发布", value: (item) => item.published ? "是" : "否" }
+    ],
+    empty: () => ({ id: uid("resource"), title: { zh: "新资源", en: "" }, category: "", description: { zh: "", en: "" }, file: "", url: "", published: true }),
+    extra: (item) => `${localizedTextarea("description", "说明", item.description)}<div class="field"><label>分类</label><input id="category" value="${esc(item.category)}"></div><div class="field"><label>文件路径</label><input id="file" value="${esc(item.file)}"></div><div class="field"><label>外部链接</label><input id="url" value="${esc(item.url)}"></div><div class="field"><label>上传文件</label><input id="upload-file" type="file"></div><div class="field"><label><input id="published" type="checkbox" ${item.published ? "checked" : ""}> 发布</label></div>`,
+    collect: async (item) => { setLocalized(item, "title", byId("title-zh").value, byId("title-en").value); setLocalized(item, "description", byId("description-zh").value, byId("description-en").value); item.category = byId("category").value; item.file = byId("file").value; item.url = byId("url").value; item.published = byId("published").checked; const file = byId("upload-file").files[0]; if (file) item.file = await uploadFile(file, "resources"); }
+  })
 };
 
-const downloadJson = () => {
-  if (isDirty) saveDraft();
-  const blob = new Blob([JSON.stringify(siteData, null, 2)], {
-    type: "application/json;charset=utf-8",
+function renderAdmissionsAdmin() {
+  const item = adminState.data.admissions;
+  return `
+    <div class="toolbar"><h1>招生信息</h1><button type="button" id="save-admissions">应用修改</button></div>
+    <div class="form-grid">
+      ${localizedFields("title", "标题", item.title)}
+      ${localizedTextarea("content", "内容", item.content)}
+      <div class="field"><label><input id="enabled" type="checkbox" ${item.enabled ? "checked" : ""}> 启用招生信息</label></div>
+    </div>
+  `;
+}
+
+function bindAdmissionsAdmin() {
+  byId("save-admissions").addEventListener("click", () => {
+    const item = adminState.data.admissions;
+    setLocalized(item, "title", byId("title-zh").value, byId("title-en").value);
+    setLocalized(item, "content", byId("content-zh").value, byId("content-en").value);
+    item.enabled = byId("enabled").checked;
+    toast("招生信息已应用。记得保存全部内容。");
   });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "data.json";
-  link.click();
-  URL.revokeObjectURL(url);
-};
+}
 
-const copyJson = async () => {
-  if (isDirty) saveDraft();
-  await navigator.clipboard.writeText(JSON.stringify(siteData, null, 2));
-  const button = document.querySelector("#copyJson");
-  const original = button.textContent;
-  button.textContent = "已复制";
-  window.setTimeout(() => {
-    button.textContent = original;
-  }, 1400);
-};
+function renderRawAdmin() {
+  return `
+    <div class="toolbar"><h1>原始 JSON</h1><button type="button" id="apply-raw">应用 JSON</button></div>
+    <p class="status">高级功能：适合整体检查或批量修改数据。格式错误会被拒绝。</p>
+    <textarea id="raw-json" style="min-height: 560px; font-family: Consolas, monospace;">${esc(JSON.stringify(adminState.data, null, 2))}</textarea>
+  `;
+}
 
-const bindPrimitiveInputs = () => {
-  document.querySelectorAll("[data-path]").forEach((input) => {
-    input.addEventListener("input", () => {
-      setByPath(input.dataset.path, input.value);
-      markDirty();
-      updatePreview();
-    });
+function bindRawAdmin() {
+  byId("apply-raw").addEventListener("click", () => {
+    try {
+      adminState.data = JSON.parse(byId("raw-json").value);
+      toast("JSON 已应用。记得保存全部内容。");
+      renderMenu();
+      render();
+    } catch (error) {
+      toast(`JSON 格式错误：${error.message}`);
+    }
   });
-};
+}
 
-const bindPortraitUpload = () => {
-  const input = document.querySelector("#portraitUpload");
-  input.addEventListener("change", () => {
-    const [file] = input.files;
-    if (!file) return;
+async function uploadFile(file, folder) {
+  const dataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      siteData.portrait = reader.result;
-      inputFor("portrait").value = siteData.portrait;
-      markDirty();
-      updatePreview();
-    });
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-};
-
-fetch("./data.json")
-  .then((response) => response.json())
-  .then((data) => {
-    const saved = localStorage.getItem(storageKey);
-    siteData = saved ? JSON.parse(saved) : data;
-    bindPrimitiveInputs();
-    bindPortraitUpload();
-    renderAll();
-    updateSaveStatus(saved ? "已加载浏览器本地草稿" : "尚未保存本次修改");
+  const res = await apiFetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileName: file.name, dataUrl, folder })
   });
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || "上传失败");
+  return result.url;
+}
 
-document.querySelector("#saveDraft").addEventListener("click", publishToGitHub);
-document.querySelector("#downloadJson").addEventListener("click", downloadJson);
-document.querySelector("#copyJson").addEventListener("click", copyJson);
-bindAuth();
+function render() {
+  const app = byId("admin-app");
+  if (!adminState.data) return;
+  const renderers = {
+    profile: renderProfile,
+    research: renderResearchAdmin,
+    publications: renderPublicationsAdmin,
+    projects: genericModules.projects.render,
+    teaching: genericModules.teaching.render,
+    admissions: renderAdmissionsAdmin,
+    news: genericModules.news.render,
+    team: genericModules.team.render,
+    resources: genericModules.resources.render,
+    raw: renderRawAdmin
+  };
+  app.innerHTML = renderers[adminState.module]();
+  const binders = {
+    profile: bindProfile,
+    research: bindResearchAdmin,
+    publications: bindPublicationsAdmin,
+    projects: genericModules.projects.bind,
+    teaching: genericModules.teaching.bind,
+    admissions: bindAdmissionsAdmin,
+    news: genericModules.news.bind,
+    team: genericModules.team.bind,
+    resources: genericModules.resources.bind,
+    raw: bindRawAdmin
+  };
+  binders[adminState.module]();
+}
+
+byId("save-site").addEventListener("click", () => {
+  if (!adminState.data) {
+    renderAuth("请先登录后台。");
+    return;
+  }
+  saveData().catch((error) => toast(`保存失败：${error.message}`));
+});
+
+byId("logout-admin").addEventListener("click", async () => {
+  if (adminState.token) {
+    await apiFetch("/api/admin/logout", { method: "POST" }).catch(() => {});
+  }
+  adminState.token = "";
+  adminState.data = null;
+  sessionStorage.removeItem("academic-admin-token");
+  renderAuth("已退出登录。");
+});
+
+initAdmin().catch((error) => {
+  byId("admin-app").innerHTML = `<p class="status">${esc(error.message)}</p>`;
+});

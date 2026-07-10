@@ -1,0 +1,410 @@
+{
+  "meta": {
+    "siteTitle": "李超 | 学术个人主页",
+    "siteTitleEn": "Chao Li | Academic Profile",
+    "defaultLocale": "zh",
+    "updatedAt": "2026-07-10",
+    "sourceUrl": "https://xxgc.tjnu.edu.cn/info/1166/3643.htm"
+  },
+  "profile": {
+    "name": {
+      "zh": "李超",
+      "en": "Chao Li"
+    },
+    "title": {
+      "zh": "副教授、硕士导师、工学博士",
+      "en": "Associate Professor, Master's Supervisor, Ph.D. in Engineering"
+    },
+    "affiliation": {
+      "zh": "天津师范大学 信息科学与工程学院",
+      "en": "College of Information Science and Engineering, Tianjin Normal University"
+    },
+    "email": "superlee@tjnu.edu.cn",
+    "phone": "",
+    "office": "",
+    "photo": "https://xxgc.tjnu.edu.cn/__local/D/48/0C/3F9EA6841CDDD94814021B4041A_528BB7FF_523C4.jpg",
+    "keywords": [
+      "人工智能",
+      "深度学习",
+      "脑机接口",
+      "情感计算"
+    ],
+    "bio": {
+      "zh": "博士，天津师范大学信息科学与工程学院教师。主要从事人工智能、深度学习、脑机接口和情感计算等方向研究，关注智能技术在教育与人机交互场景中的应用。",
+      "en": "Dr. Yingchao Peng is a faculty member at the College of Information Science and Engineering, Tianjin Normal University. Research interests include artificial intelligence, deep learning, brain-computer interfaces, and affective computing."
+    },
+    "summary": {
+      "zh": "研究方向明确、教学经验扎实，持续关注人工智能与教育技术交叉领域的科研和工程实践。",
+      "en": "Focused on AI-driven research and engineering practice across educational technology and human-centered intelligent systems."
+    },
+    "links": [
+      {
+        "label": "Email",
+        "url": "mailto:superlee@tjnu.edu.cn"
+      }
+    ]
+  },
+  "homepage": {
+    "notice": {
+      "zh": "欢迎对人工智能、深度学习、脑机接口、情感计算及教育技术应用感兴趣的同学联系交流。",
+      "en": "Students interested in AI, deep learning, BCI, affective computing, and educational technology are welcome to get in touch."
+    },
+    "stats": [
+      {
+        "label": {
+          "zh": "研究方向",
+          "en": "Research Areas"
+        },
+        "value": "4"
+      },
+      {
+        "label": {
+          "zh": "科研项目",
+          "en": "Projects"
+        },
+        "value": "6"
+      },
+      {
+        "label": {
+          "zh": "代表性成果",
+          "en": "Selected Works"
+        },
+        "value": "5"
+      }
+    ]
+  },
+  "research": [
+    {
+      "id": "ai-deep-learning",
+      "title": {
+        "zh": "人工智能与深度学习",
+        "en": "Artificial Intelligence and Deep Learning"
+      },
+      "summary": {
+        "zh": "围绕神经网络、智能建模与数据驱动方法开展研究，关注算法在教育、认知和工程场景中的应用。",
+        "en": "Research on neural networks, intelligent modeling, and data-driven methods for educational, cognitive, and engineering applications."
+      },
+      "keywords": [
+        "人工智能",
+        "深度学习",
+        "智能建模"
+      ],
+      "order": 1
+    },
+    {
+      "id": "brain-computer-interface",
+      "title": {
+        "zh": "脑机接口",
+        "en": "Brain-Computer Interface"
+      },
+      "summary": {
+        "zh": "关注脑电信号分析、认知状态识别和智能交互，为教育与健康场景提供数据支持。",
+        "en": "EEG signal analysis, cognitive-state recognition, and intelligent interaction for education and health-related scenarios."
+      },
+      "keywords": [
+        "脑机接口",
+        "脑电",
+        "认知状态"
+      ],
+      "order": 2
+    },
+    {
+      "id": "affective-computing",
+      "title": {
+        "zh": "情感计算",
+        "en": "Affective Computing"
+      },
+      "summary": {
+        "zh": "研究学习者情感、注意力和认知负荷等状态的识别与建模，探索智能教育支持方式。",
+        "en": "Modeling learners' affect, attention, and cognitive load to support intelligent education."
+      },
+      "keywords": [
+        "情感计算",
+        "学习分析",
+        "教育技术"
+      ],
+      "order": 3
+    }
+  ],
+  "publications": [
+    {
+      "id": "pub-2024-bci-affect-review",
+      "type": "journal_article",
+      "title": {
+        "zh": "人工智能与脑机接口融合研究进展",
+        "en": "Research Progress on the Integration of Artificial Intelligence and Brain-Computer Interfaces"
+      },
+      "authors": "彭英超等",
+      "year": 2024,
+      "date": "2024",
+      "venue": "待补充",
+      "levels": [
+        "待补充"
+      ],
+      "jcr": "",
+      "cas": "",
+      "ccf": "",
+      "doi": "",
+      "cnki": "",
+      "pdf": "",
+      "projectUrl": "",
+      "codeUrl": "",
+      "datasetUrl": "",
+      "abstract": {
+        "zh": "待补充摘要。",
+        "en": ""
+      },
+      "keywords": [
+        "人工智能",
+        "脑机接口"
+      ],
+      "areas": [
+        "脑机接口",
+        "人工智能"
+      ],
+      "featured": true,
+      "pinned": true,
+      "status": "published",
+      "bibtex": "",
+      "citation": "",
+      "notes": "由旧主页代表性成果迁移，详细发表信息待核对。"
+    },
+    {
+      "id": "pub-2023-deep-learning-education",
+      "type": "journal_article",
+      "title": {
+        "zh": "深度学习支持下的学习状态识别研究",
+        "en": "Learning State Recognition Supported by Deep Learning"
+      },
+      "authors": "彭英超等",
+      "year": 2023,
+      "date": "2023",
+      "venue": "待补充",
+      "levels": [
+        "待补充"
+      ],
+      "jcr": "",
+      "cas": "",
+      "ccf": "",
+      "doi": "",
+      "cnki": "",
+      "pdf": "",
+      "projectUrl": "",
+      "codeUrl": "",
+      "datasetUrl": "",
+      "abstract": {
+        "zh": "待补充摘要。",
+        "en": ""
+      },
+      "keywords": [
+        "深度学习",
+        "学习状态"
+      ],
+      "areas": [
+        "深度学习",
+        "情感计算"
+      ],
+      "featured": true,
+      "pinned": false,
+      "status": "published",
+      "bibtex": "",
+      "citation": "",
+      "notes": "示例结构数据，待以真实论文清单替换。"
+    },
+    {
+      "id": "pub-2022-affective-computing",
+      "type": "conference_paper",
+      "title": {
+        "zh": "面向教育场景的情感计算方法研究",
+        "en": "Affective Computing Methods for Educational Scenarios"
+      },
+      "authors": "彭英超等",
+      "year": 2022,
+      "date": "2022",
+      "venue": "待补充",
+      "levels": [
+        "EI"
+      ],
+      "jcr": "",
+      "cas": "",
+      "ccf": "",
+      "doi": "",
+      "cnki": "",
+      "pdf": "",
+      "projectUrl": "",
+      "codeUrl": "",
+      "datasetUrl": "",
+      "abstract": {
+        "zh": "待补充摘要。",
+        "en": ""
+      },
+      "keywords": [
+        "情感计算",
+        "教育技术"
+      ],
+      "areas": [
+        "情感计算"
+      ],
+      "featured": false,
+      "pinned": false,
+      "status": "published",
+      "bibtex": "",
+      "citation": "",
+      "notes": "示例结构数据，待以真实论文清单替换。"
+    }
+  ],
+  "projects": [
+    {
+      "id": "project-1",
+      "title": {
+        "zh": "天津市教育科学规划课题",
+        "en": "Tianjin Education Science Planning Project"
+      },
+      "role": {
+        "zh": "负责人/参与人，待补充",
+        "en": "PI/Participant, to be completed"
+      },
+      "period": "待补充",
+      "source": "旧主页迁移",
+      "summary": {
+        "zh": "旧主页显示科研项目共 6 项，具体项目名称与信息待进一步核对补全。",
+        "en": "Six research projects are listed on the legacy profile; detailed information awaits verification."
+      },
+      "status": "active",
+      "order": 1
+    },
+    {
+      "id": "project-2",
+      "title": {
+        "zh": "人工智能与教育技术相关研究项目",
+        "en": "AI and Educational Technology Research Project"
+      },
+      "role": {
+        "zh": "待补充",
+        "en": "To be completed"
+      },
+      "period": "待补充",
+      "source": "旧主页迁移",
+      "summary": {
+        "zh": "围绕人工智能、深度学习与教育应用开展研究。",
+        "en": "Research on AI, deep learning, and educational applications."
+      },
+      "status": "active",
+      "order": 2
+    }
+  ],
+  "teaching": [
+    {
+      "id": "course-1",
+      "name": {
+        "zh": "Python语言程序设计",
+        "en": "Python Programming"
+      },
+      "audience": {
+        "zh": "本科生",
+        "en": "Undergraduate Students"
+      },
+      "semester": "待补充",
+      "summary": {
+        "zh": "旧主页课程信息迁移，课程介绍待补充。",
+        "en": "Course migrated from the legacy profile; description to be completed."
+      },
+      "order": 1
+    },
+    {
+      "id": "course-2",
+      "name": {
+        "zh": "人工智能基础",
+        "en": "Fundamentals of Artificial Intelligence"
+      },
+      "audience": {
+        "zh": "本科生/研究生",
+        "en": "Undergraduate/Graduate Students"
+      },
+      "semester": "待补充",
+      "summary": {
+        "zh": "围绕人工智能基本概念、方法与应用开展教学。",
+        "en": "Teaching basic concepts, methods, and applications of artificial intelligence."
+      },
+      "order": 2
+    }
+  ],
+  "admissions": {
+    "enabled": true,
+    "title": {
+      "zh": "招生与科研合作",
+      "en": "Admissions and Research Collaboration"
+    },
+    "content": {
+      "zh": "欢迎对人工智能、深度学习、脑机接口、情感计算、教育数据分析等方向感兴趣的同学联系。建议来信包含个人简历、研究兴趣、已有项目或论文经历。",
+      "en": "Students interested in AI, deep learning, BCI, affective computing, and educational data analysis are welcome to contact me. Please include your CV, research interests, and relevant project or publication experience."
+    }
+  },
+  "news": [
+    {
+      "id": "news-1",
+      "title": {
+        "zh": "新版学术个人主页建设中",
+        "en": "New Academic Profile Website in Progress"
+      },
+      "date": "2026-07-11",
+      "cover": "",
+      "body": {
+        "zh": "网站正在进行内容迁移和结构化维护，后续将持续更新论文、项目、课程和资源信息。",
+        "en": "This website is being migrated and structured. Publications, projects, courses, and resources will be updated continuously."
+      },
+      "published": true
+    }
+  ],
+  "team": [
+    {
+      "id": "team-1",
+      "name": {
+        "zh": "团队成员待补充",
+        "en": "Team Member To Be Added"
+      },
+      "role": {
+        "zh": "学生/合作者",
+        "en": "Student/Collaborator"
+      },
+      "research": {
+        "zh": "人工智能、脑机接口、情感计算",
+        "en": "AI, BCI, affective computing"
+      },
+      "email": "",
+      "photo": "",
+      "order": 1
+    }
+  ],
+  "resources": [
+    {
+      "id": "resource-1",
+      "title": {
+        "zh": "课程资源待上传",
+        "en": "Course Resources To Be Uploaded"
+      },
+      "category": "教学资源",
+      "description": {
+        "zh": "后续可在后台上传 PDF、课件或数据文件。",
+        "en": "PDFs, slides, or datasets can be uploaded later through the local admin."
+      },
+      "file": "",
+      "url": "",
+      "published": false
+    }
+  ],
+  "awards": [
+    {
+      "id": "award-1",
+      "title": {
+        "zh": "天津师范大学青年教师教学竞赛二等奖",
+        "en": "Second Prize, Young Faculty Teaching Competition, Tianjin Normal University"
+      },
+      "year": "待补充",
+      "summary": {
+        "zh": "由旧主页奖励荣誉信息迁移，年份待核对。",
+        "en": "Migrated from the legacy profile; year to be verified."
+      }
+    }
+  ]
+}

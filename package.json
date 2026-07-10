@@ -1,0 +1,10 @@
+{
+  "name": "academic-profile-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Academic personal website with a local visual content admin for GitHub Pages.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

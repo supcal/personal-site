@@ -1,132 +1,28 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>李超 | 天津师范大学</title>
-    <meta
-      name="description"
-      content="李超，天津师范大学计算机与信息工程学院副教授、硕士导师。研究方向包括人工智能、深度学习、情感计算、脑机接口。"
-    />
-    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./styles.css" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>学术个人主页</title>
+    <meta name="description" content="高校教师学术个人主页，包含研究方向、论文成果、科研项目、教学课程、招生信息和资源下载。">
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="#top" data-field="name">李超</a>
-      <nav class="nav" aria-label="页面导航">
-        <a href="#about">简介</a>
-        <a href="#research">研究</a>
-        <a href="#projects">项目</a>
-        <a href="#publications">论文</a>
-        <a href="#teaching">教学</a>
-        <a href="#contact">联系</a>
-      </nav>
-    </header>
-
-    <main id="top">
-      <section class="hero">
-        <aside class="profile-panel" aria-label="个人信息">
-          <div class="portrait-wrap">
-            <img alt="李超" class="portrait" data-field="portrait" />
-          </div>
-          <div class="identity">
-            <p class="eyebrow" data-field="role_en"></p>
-            <h1 data-field="name"></h1>
-            <p data-field="affiliation_cn"></p>
-            <p data-field="titles"></p>
-          </div>
-          <dl class="quick-info">
-            <div>
-              <dt>Email</dt>
-              <dd><a data-field="email_link"></a></dd>
-            </div>
-            <div>
-              <dt>Affiliation</dt>
-              <dd data-field="affiliation_en"></dd>
-            </div>
-          </dl>
-          <div class="profile-links" data-list="links"></div>
-        </aside>
-
-        <div class="hero-copy">
-          <p class="eyebrow" data-field="hero_kicker"></p>
-          <h2 data-field="hero_title"></h2>
-          <p data-field="hero_summary"></p>
-          <div class="hero-actions">
-            <a class="button" href="#publications">代表论文</a>
-            <a class="button secondary-button" href="#projects">科研项目</a>
-          </div>
-          <div class="hero-stats" data-list="stats" aria-label="学术概览"></div>
-        </div>
-      </section>
-
-      <section id="about" class="section two-column">
-        <div class="section-title">
-          <p class="eyebrow">Profile</p>
-          <h2>个人简介</h2>
-        </div>
-        <div class="section-body" data-list="profile"></div>
-      </section>
-
-      <section id="research" class="section">
-        <div class="section-title compact">
-          <p class="eyebrow">Research Areas</p>
-          <h2>研究方向</h2>
-        </div>
-        <div class="research-grid" data-list="research"></div>
-      </section>
-
-      <section id="projects" class="section two-column">
-        <div class="section-title">
-          <p class="eyebrow">Selected Grants</p>
-          <h2>科研项目</h2>
-        </div>
-        <div class="timeline" data-list="projects"></div>
-      </section>
-
-      <section id="publications" class="section">
-        <div class="section-title compact">
-          <p class="eyebrow">Publications</p>
-          <h2>代表性论文 <a class="more-link" href="./publications.html">more</a></h2>
-        </div>
-        <div class="publication-list" data-list="publications"></div>
-      </section>
-
-      <section id="teaching" class="section two-column">
-        <div class="section-title">
-          <p class="eyebrow">Teaching & Honors</p>
-          <h2>教学与荣誉</h2>
-        </div>
-        <div class="split-content">
-          <div>
-            <h3>讲授课程</h3>
-            <ul class="tag-list" data-list="courses"></ul>
-          </div>
-          <div>
-            <h3>奖励情况</h3>
-            <ul class="award-list" data-list="awards"></ul>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" class="section contact-section">
-        <div>
-          <p class="eyebrow">Contact</p>
-          <h2>联系与合作</h2>
-        </div>
-        <div class="contact-card">
-          <p data-field="contact_note"></p>
-          <a class="button" data-field="email_link"></a>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <span>© <span id="year"></span> <span data-field="footer_name"></span></span>
-      <a data-field="source_link">学校主页资料来源</a>
-    </footer>
-
-    <script src="./script.js"></script>
+    <div class="site-shell">
+      <header class="topbar">
+        <nav class="nav">
+          <a class="brand" href="#home" aria-label="返回首页">
+            <strong id="brand-name">学术个人主页</strong>
+            <span id="brand-affiliation">Academic Profile</span>
+          </a>
+          <div class="nav-links" id="nav-links"></div>
+        </nav>
+      </header>
+      <main class="main" id="app">
+        <p class="status">正在加载网站内容...</p>
+      </main>
+      <footer class="footer" id="footer"></footer>
+    </div>
+    <script src="app.js"></script>
   </body>
 </html>

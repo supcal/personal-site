@@ -1,0 +1,81 @@
+[[agents]]
+id = "academic_positioning_agent"
+name = "学术定位 Agent"
+role = "明确高校教师学术个人网站的定位、目标受众、核心形象和首页主叙事"
+stage = "planning"
+handoff_to = ["content_architecture_agent", "academic_visual_design_agent", "publication_data_agent"]
+
+[[agents]]
+id = "content_architecture_agent"
+name = "内容架构 Agent"
+role = "规划网站栏目、页面结构、中英文内容策略和旧主页迁移映射"
+stage = "planning"
+handoff_to = ["publication_data_agent", "content_admin_agent", "academic_visual_design_agent"]
+
+[agents.scope]
+pages = ["home", "profile", "research", "publications", "projects", "teaching", "admissions", "news", "team", "resources"]
+default_locale = "zh"
+secondary_locale = "en"
+legacy_content_migration = "full"
+
+[[agents]]
+id = "academic_visual_design_agent"
+name = "学术视觉设计 Agent"
+role = "设计高校教授主页风格的视觉系统、布局、组件和论文列表样式"
+stage = "design"
+handoff_to = ["fullstack_implementation_agent", "review_testing_agent"]
+
+[agents.visual_style]
+style = "university_professor_homepage"
+tone = "traditional_stable"
+color_direction = "low_saturation_technology"
+hero_photo = "work_photo"
+publication_layout = "list_with_filters"
+
+[[agents]]
+id = "publication_data_agent"
+name = "论文数据 Agent"
+role = "设计正式论文库的数据模型、筛选规则、导入流程和展示逻辑"
+stage = "data_modeling"
+handoff_to = ["content_admin_agent", "fullstack_implementation_agent"]
+
+[agents.publications]
+supports_crud = true
+quick_entry = true
+full_entry = true
+single_import = true
+batch_import = true
+formats = ["csv", "xlsx", "bibtex", "ris"]
+
+[[agents]]
+id = "content_admin_agent"
+name = "内容管理后台 Agent"
+role = "设计和实现本地可视化内容管理后台，使用户无需改代码即可维护网站内容"
+stage = "admin_design"
+handoff_to = ["fullstack_implementation_agent", "review_testing_agent"]
+
+[agents.admin]
+first_stage = "local_admin"
+second_stage = "online_admin"
+content_storage = "github_repository"
+token_exposure_allowed = false
+
+[[agents]]
+id = "fullstack_implementation_agent"
+name = "全栈实现 Agent"
+role = "实现静态学术网站、本地后台、论文 CRUD、本地预览和 GitHub Pages 部署结构"
+stage = "implementation"
+handoff_to = ["review_testing_agent"]
+
+[agents.implementation]
+hosting = "github_pages"
+local_preview_first = true
+content_storage = "json_in_repository"
+resource_storage = "github_repository"
+
+[[agents]]
+id = "review_testing_agent"
+name = "审核测试 Agent"
+role = "审核视觉效果、内容完整性、后台可用性、移动端、数据安全、加载速度和学术表达"
+stage = "review"
+output = "detailed_issue_list"

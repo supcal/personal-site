@@ -1,0 +1,4 @@
+.admin-auth.json
+data/backups/
+server.log
+server-error.log
