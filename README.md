@@ -1,20 +1,15 @@
-# 个人网站
+# 李超个人学术主页
 
-这是一个可直接部署到 GitHub Pages 的静态个人网站。
+这是一个托管在 GitHub Pages 上的静态个人学术主页。
 
-## 本地预览
+## 内容来源
 
-直接用浏览器打开 `index.html` 即可。
+页面基础信息整理自天津师范大学计算机与信息工程学院教师主页：
 
-## 需要替换的内容
+https://xxgc.tjnu.edu.cn/info/1166/3643.htm
 
-- `index.html` 里的姓名、简介、项目和邮箱。
-- `styles.css` 里的首页背景图地址，可换成自己的照片或项目图片。
+## 文件
 
-## 发布到 GitHub Pages
-
-1. 在 GitHub 新建一个仓库，例如 `personal-site`。
-2. 把本目录里的文件推送到仓库。
-3. 在仓库页面打开 `Settings` -> `Pages`。
-4. Source 选择 `Deploy from a branch`，Branch 选择 `main` 和 `/root`。
-5. 保存后等待 GitHub 生成访问地址。
+- `index.html`：主页内容
+- `styles.css`：页面样式
+- `script.js`：年份更新脚本
