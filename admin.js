@@ -75,6 +75,9 @@ let isDirty = false;
 const storageKey = "personal-site-editor-draft";
 const authKey = "personal-site-editor-auth";
 const passwordHash = "5c130f4a86c9beb7406caf830eec4414010c5132fcae42875768efb6c6417c45";
+const repoOwner = "supcal";
+const repoName = "personal-site";
+const dataPath = "data.json";
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const inputFor = (path) => document.querySelector(`[data-path="${path}"]`);
 
@@ -267,6 +270,69 @@ const saveDraft = () => {
   updateSaveStatus(`已保存到浏览器草稿：${new Date().toLocaleString()}`);
 };
 
+const encodeBase64Utf8 = (text) => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+};
+
+const publishToGitHub = async () => {
+  const token = document.querySelector("#githubToken").value.trim();
+  if (!token) {
+    saveDraft();
+    updateSaveStatus("已保存草稿。要直接发布到网站，请先填写 GitHub Token。");
+    return;
+  }
+
+  const bodyText = JSON.stringify(siteData, null, 2);
+  if (bodyText.length > 900000) {
+    updateSaveStatus("内容太大，可能无法直接发布。请压缩图片/PDF，或把文件上传到仓库后填写链接。");
+    return;
+  }
+
+  updateSaveStatus("正在发布到 GitHub...");
+  const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${dataPath}`;
+  const headers = {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${token}`,
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+
+  const current = await fetch(`${apiUrl}?ref=main`, { headers });
+  if (!current.ok) {
+    updateSaveStatus("读取 GitHub 文件失败，请检查 Token 权限。");
+    return;
+  }
+
+  const currentData = await current.json();
+  const response = await fetch(apiUrl, {
+    method: "PUT",
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: "Update homepage data from visual editor",
+      content: encodeBase64Utf8(bodyText),
+      sha: currentData.sha,
+      branch: "main",
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    updateSaveStatus(`发布失败：${error.message || response.status}`);
+    return;
+  }
+
+  localStorage.removeItem(storageKey);
+  isDirty = false;
+  updateSaveStatus(`已发布到 GitHub：${new Date().toLocaleString()}，网站稍后自动更新。`);
+};
+
 const downloadJson = () => {
   if (isDirty) saveDraft();
   const blob = new Blob([JSON.stringify(siteData, null, 2)], {
@@ -328,7 +394,7 @@ fetch("./data.json")
     updateSaveStatus(saved ? "已加载浏览器本地草稿" : "尚未保存本次修改");
   });
 
-document.querySelector("#saveDraft").addEventListener("click", saveDraft);
+document.querySelector("#saveDraft").addEventListener("click", publishToGitHub);
 document.querySelector("#downloadJson").addEventListener("click", downloadJson);
 document.querySelector("#copyJson").addEventListener("click", copyJson);
 bindAuth();
